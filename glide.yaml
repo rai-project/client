@@ -1,0 +1,22 @@
+package: github.com/rai-project/client
+import:
+- package: github.com/Sirupsen/logrus
+  version: ~0.11.2
+- package: github.com/Unknwon/com
+  version: ~1.0.0
+- package: github.com/k0kubun/pp
+  version: ~2.3.0
+- package: github.com/pkg/errors
+  version: ~0.8.0
+- package: github.com/rai-project/broker
+  subpackages:
+  - sqs
+- package: github.com/rai-project/config
+- package: github.com/rai-project/logger
+- package: github.com/rai-project/ratelimit
+- package: github.com/rai-project/serializer
+  subpackages:
+  - json
+- package: github.com/rai-project/user
+- package: github.com/rai-project/uuid
+- package: github.com/rai-project/vipertags
