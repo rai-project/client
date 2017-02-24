@@ -17,6 +17,7 @@ import (
 )
 
 type client struct {
+	ID          string
 	options     Options
 	broker      broker.Broker
 	subscribers []broker.Subscriber
@@ -46,6 +47,7 @@ func New(opts ...Option) (*client, error) {
 	}
 
 	return &client{
+		ID:      uuid.NewV4(),
 		options: options,
 	}, nil
 }
@@ -81,13 +83,12 @@ func (c *client) Init() error {
 	)
 	c.broker = brkr
 
-	id := uuid.NewV4()
 	err := brkr.Publish(
 		"rai",
 		&broker.Message{
-			ID: id,
+			ID: c.ID,
 			Header: map[string]string{
-				"id": id,
+				"id": c.ID,
 			},
 			Body: []byte("data"),
 		},
