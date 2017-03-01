@@ -2,22 +2,27 @@ package client
 
 import (
 	"os"
+	"time"
 
 	"path/filepath"
 
 	"github.com/Unknwon/com"
 	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
+	"github.com/rai-project/archive"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/ratelimit"
 	"github.com/rai-project/serializer/json"
+	"github.com/rai-project/store"
+	"github.com/rai-project/store/s3"
 	"github.com/rai-project/user"
 	"github.com/rai-project/uuid"
 )
 
 type client struct {
 	ID          string
+	uploadKey   string
 	options     Options
 	broker      broker.Broker
 	subscribers []broker.Subscriber
@@ -68,12 +73,38 @@ func (c *client) Validate() error {
 	if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (c *client) resultHandler(pub broker.Publication) error {
 	msg := pub.Message()
 	pp.Println(string(msg.Body))
+	return nil
+}
+
+func (c *client) Upload() error {
+	store, err := s3.New(
+		store.Bucket(Config.UploadBucketName),
+	)
+	if err != nil {
+		return err
+	}
+
+	zippedReader, err := archive.Zip(c.options.directory)
+	if err != nil {
+		return err
+	}
+	defer zippedReader.Close()
+	key, err := store.UploadFrom(
+		zippedReader,
+		c.ID,
+		s3.Expiration(time.Now().AddDate(0, 0, 1)), // tomorrow
+	)
+	if err != nil {
+		return err
+	}
+	c.uploadKey = key
 	return nil
 }
 

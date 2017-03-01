@@ -7,7 +7,8 @@ import (
 )
 
 type clientConfig struct {
-	BuildFileBaseName string `json:"build_file" config:"app.build_file" default:"default"`
+	UploadBucketName  string `json:"upload_bucket" config:"client.upload_bucket" default:"files.rai-project.com"`
+	BuildFileBaseName string `json:"build_file" config:"client.build_file" default:"default"`
 }
 
 var (
