@@ -98,7 +98,7 @@ func (c *client) Init() error {
 	}
 
 	subscriber, err := brkr.Subscribe(
-		"log-"+id,
+		"log-"+c.ID,
 		c.resultHandler,
 		broker.AutoAck(true),
 	)
