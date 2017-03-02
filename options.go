@@ -45,6 +45,10 @@ func Ratelimit(d time.Duration) Option {
 	}
 }
 
+func DisableRatelimit() Option {
+	return Ratelimit(0)
+}
+
 func Stdout(s io.WriteCloser) Option {
 	return func(o *Options) {
 		o.stdout = s

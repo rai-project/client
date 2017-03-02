@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	sourcepath "github.com/GeertJohan/go-sourcepath"
+	"github.com/k0kubun/pp"
 	"github.com/rai-project/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,6 +15,7 @@ func TestClient(t *testing.T) {
 	clt, err := New(
 		Directory(filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures")),
 		BuildFileBaseName("rai_build"),
+		DisableRatelimit(),
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, clt)
@@ -21,6 +23,11 @@ func TestClient(t *testing.T) {
 
 	err = clt.Validate()
 	assert.NoError(t, err)
+
+	err = clt.Upload()
+	assert.NoError(t, err)
+	assert.NotEmpty(t, clt.uploadKey, "upload key must be set after upload")
+	pp.Println(clt.uploadKey)
 }
 
 func TestMain(m *testing.M) {

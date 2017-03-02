@@ -122,7 +122,7 @@ func (c *client) Upload() error {
 	defer zippedReader.Close()
 	key, err := store.UploadFrom(
 		zippedReader,
-		c.ID,
+		Config.UploadDestinationDirectory+"/"+c.ID+".tar."+archive.Config.CompressionFormatString,
 		s3.Expiration(time.Now().AddDate(0, 0, 1)), // tomorrow
 	)
 	if err != nil {
