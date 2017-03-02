@@ -14,6 +14,7 @@ import (
 	"github.com/rai-project/aws"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
+	"github.com/rai-project/config"
 	"github.com/rai-project/ratelimit"
 	"github.com/rai-project/serializer/json"
 	"github.com/rai-project/store"
@@ -141,10 +142,10 @@ func (c *client) Upload() error {
 }
 
 func (c *client) Init() error {
-
 	brkr, err := sqs.New(
-		sqs.Session(c.awsSession),
+		sqs.QueueName(config.App.Name),
 		broker.Serializer(json.New()),
+		sqs.Session(c.awsSession),
 	)
 	if err != nil {
 		return err
