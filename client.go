@@ -71,7 +71,7 @@ func (c *client) Validate() error {
 		return err
 	}
 
-	buildFilePath := filepath.Join(options.directory, options.buildFileBaseName)
+	buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
 	if !com.IsFile(buildFilePath) {
 		return errors.Errorf("the build file [%v] does not exist", buildFilePath)
 	}
