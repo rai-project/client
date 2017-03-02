@@ -33,6 +33,10 @@ type client struct {
 	subscribers []broker.Subscriber
 }
 
+var (
+	DefaultUploadExpiration = time.Now().AddDate(0, 0, 1) // tomorrow
+)
+
 func New(opts ...Option) (*client, error) {
 	options := Options{
 		directory:         "",
@@ -120,10 +124,13 @@ func (c *client) Upload() error {
 		return err
 	}
 	defer zippedReader.Close()
+
+	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + ".tar." + archive.Config.CompressionFormatString
+
 	key, err := store.UploadFrom(
 		zippedReader,
-		Config.UploadDestinationDirectory+"/"+c.ID+".tar."+archive.Config.CompressionFormatString,
-		s3.Expiration(time.Now().AddDate(0, 0, 1)), // tomorrow
+		uploadKey,
+		s3.Expiration(DefaultUploadExpiration),
 	)
 	if err != nil {
 		return err
