@@ -7,9 +7,11 @@ import (
 	"path/filepath"
 
 	"github.com/Unknwon/com"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
+	"github.com/rai-project/aws"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/ratelimit"
@@ -23,8 +25,11 @@ import (
 type client struct {
 	ID          string
 	uploadKey   string
+	awsSession  *session.Session
 	options     Options
 	broker      broker.Broker
+	profile     *user.Profile
+	isConnected bool
 	subscribers []broker.Subscriber
 }
 
@@ -52,8 +57,9 @@ func New(opts ...Option) (*client, error) {
 	}
 
 	return &client{
-		ID:      uuid.NewV4(),
-		options: options,
+		ID:          uuid.NewV4(),
+		isConnected: false,
+		options:     options,
 	}, nil
 }
 
@@ -61,7 +67,7 @@ func (c *client) Validate() error {
 	options := c.options
 
 	// Authenticate user
-	if err := authenticate(options.profilePath); err != nil {
+	if err := c.authenticate(options.profilePath); err != nil {
 		return err
 	}
 
@@ -74,6 +80,13 @@ func (c *client) Validate() error {
 		return err
 	}
 
+	// Create an AWS session
+	session, err := aws.NewSession(aws.Sts())
+	if err != nil {
+		return err
+	}
+	c.awsSession = session
+
 	return nil
 }
 
@@ -84,7 +97,13 @@ func (c *client) resultHandler(pub broker.Publication) error {
 }
 
 func (c *client) Upload() error {
+	if c.awsSession == nil {
+		log.Fatal("Expecting the awsSession to be set. Call Init before calling Upload")
+		return errors.New("invalid usage")
+	}
+
 	store, err := s3.New(
+		s3.Session(c.awsSession),
 		store.Bucket(Config.UploadBucketName),
 	)
 	if err != nil {
@@ -105,21 +124,30 @@ func (c *client) Upload() error {
 		return err
 	}
 	c.uploadKey = key
+
 	return nil
 }
 
 func (c *client) Init() error {
-	brkr := sqs.New(
+	brkr, err := sqs.New(
+		sqs.Session(c.awsSession),
 		broker.Serializer(json.New()),
 	)
+	if err != nil {
+		return err
+	}
 	c.broker = brkr
 
-	err := brkr.Publish(
+	err = brkr.Publish(
 		"rai",
 		&broker.Message{
 			ID: c.ID,
 			Header: map[string]string{
-				"id": c.ID,
+				"id":              c.ID,
+				"upload_key":      c.uploadKey,
+				"username":        c.profile.Username,
+				"user_access_key": c.profile.AccessKey,
+				"user_secret_key": c.profile.SecretKey,
 			},
 			Body: []byte("data"),
 		},
@@ -143,17 +171,24 @@ func (c *client) Init() error {
 }
 
 func (c *client) Connect() error {
-	return c.broker.Connect()
+	if err := c.broker.Connect(); err != nil {
+		return err
+	}
+	c.isConnected = true
+	return nil
 }
 
 func (c *client) Disconnect() error {
+	if !c.isConnected {
+		return nil
+	}
 	for _, sub := range c.subscribers {
 		sub.Unsubscribe()
 	}
 	return c.broker.Disconnect()
 }
 
-func authenticate(profilePath string) error {
+func (c *client) authenticate(profilePath string) error {
 	prof, err := user.NewProfile(profilePath)
 	if err != nil {
 		return err
@@ -162,5 +197,6 @@ func authenticate(profilePath string) error {
 	if !ok {
 		return errors.Errorf("cannot authenticate using the credentials in %v", profilePath)
 	}
+	c.profile = prof
 	return nil
 }
