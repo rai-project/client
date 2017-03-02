@@ -18,7 +18,6 @@ func TestClient(t *testing.T) {
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, clt)
-	defer clt.Disconnect()
 
 	err = clt.Validate()
 	assert.NoError(t, err)
@@ -29,6 +28,11 @@ func TestClient(t *testing.T) {
 	err = clt.Upload()
 	assert.NoError(t, err)
 	assert.NotEmpty(t, clt.uploadKey, "upload key must be set after upload")
+
+	err = clt.Connect()
+	assert.NoError(t, err)
+
+	defer clt.Disconnect()
 }
 
 func TestMain(m *testing.M) {
