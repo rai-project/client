@@ -141,6 +141,7 @@ func (c *client) Upload() error {
 }
 
 func (c *client) Init() error {
+
 	brkr, err := sqs.New(
 		sqs.Session(c.awsSession),
 		broker.Serializer(json.New()),
