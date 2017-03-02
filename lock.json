@@ -1,5 +1,5 @@
 {
-    "memo": "2dab25fae2fac46c2b5572b77eb2ca3ea3cd95736fda135529b9dc8089ec9df8",
+    "memo": "5eab59fac9129f28901cbe7406464dc767e4d74d2e814499de9cc877503267d5",
     "projects": [
         {
             "name": "github.com/BurntSushi/toml",
@@ -18,9 +18,17 @@
             ]
         },
         {
+            "name": "github.com/Microsoft/go-winio",
+            "version": "v0.3.8",
+            "revision": "fff283ad5116362ca252298cfc9b95828956d85d",
+            "packages": [
+                "."
+            ]
+        },
+        {
             "name": "github.com/Sirupsen/logrus",
             "branch": "master",
-            "revision": "7f4b1adc791766938c29457bed0703fb9134421a",
+            "revision": "0208149b40d863d2c1a2f8fe5753096a9cf2cc8b",
             "packages": [
                 ".",
                 "hooks/syslog"
@@ -37,7 +45,7 @@
         {
             "name": "github.com/aws/aws-sdk-go",
             "branch": "master",
-            "revision": "2d3b3bc3aae6a09a9b194aa6eb71326fcbe2e918",
+            "revision": "78568b07950e5e7948496878fe99b9436add41d4",
             "packages": [
                 "aws",
                 "aws/awserr",
@@ -59,7 +67,12 @@
                 "private/protocol/query",
                 "private/protocol/query/queryutil",
                 "private/protocol/rest",
+                "private/protocol/restxml",
                 "private/protocol/xml/xmlutil",
+                "private/waiter",
+                "service/s3",
+                "service/s3/s3iface",
+                "service/s3/s3manager",
                 "service/sqs",
                 "service/sts"
             ]
@@ -70,6 +83,29 @@
             "revision": "346938d642f2ec3594ed81d874461961cd0faa76",
             "packages": [
                 "spew"
+            ]
+        },
+        {
+            "name": "github.com/docker/docker",
+            "branch": "master",
+            "revision": "7fb83eb7629856756e3ed7b1f20cedc87584354b",
+            "packages": [
+                "pkg/archive",
+                "pkg/fileutils",
+                "pkg/idtools",
+                "pkg/ioutils",
+                "pkg/longpath",
+                "pkg/pools",
+                "pkg/promise",
+                "pkg/system"
+            ]
+        },
+        {
+            "name": "github.com/docker/go-units",
+            "branch": "master",
+            "revision": "0dadbb0345b35ec7ef35e228dabb8de89a65bf52",
+            "packages": [
+                "."
             ]
         },
         {
@@ -115,7 +151,7 @@
         {
             "name": "github.com/hashicorp/hcl",
             "branch": "master",
-            "revision": "372e8ddaa16fd67e371e9323807d056b799360af",
+            "revision": "630949a3c5fa3c613328e1b8256052cbc2327c9b",
             "packages": [
                 ".",
                 "hcl/ast",
@@ -185,9 +221,18 @@
             ]
         },
         {
+            "name": "github.com/opencontainers/runc",
+            "version": "v0.1.1",
+            "revision": "baf6536d6259209c3edfa2b22237af82942d3dfa",
+            "packages": [
+                "libcontainer/system",
+                "libcontainer/user"
+            ]
+        },
+        {
             "name": "github.com/pelletier/go-buffruneio",
             "branch": "master",
-            "revision": "df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d",
+            "revision": "c37440a7cf42ac63b919c752ca73a85067e05992",
             "packages": [
                 "."
             ]
@@ -195,7 +240,7 @@
         {
             "name": "github.com/pelletier/go-toml",
             "branch": "master",
-            "revision": "22139eb5469018e7374b3e7ef653de37ffb44f72",
+            "revision": "361678322880708ac144df8575e6f01144ba1404",
             "packages": [
                 "."
             ]
@@ -203,7 +248,23 @@
         {
             "name": "github.com/pkg/errors",
             "branch": "master",
-            "revision": "248dadf4e9068a0b3e79f02ed0a610d935de5302",
+            "revision": "bfd5150e4e41705ded2129ec33379de1cb90b513",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/pmezard/go-difflib",
+            "version": "v1.0.0",
+            "revision": "792786c7400a136282c1664665ae0a8db921c6c2",
+            "packages": [
+                "difflib"
+            ]
+        },
+        {
+            "name": "github.com/rai-project/archive",
+            "branch": "master",
+            "revision": "35dafd0b3163f4cf03a81ddd23ab001f611837fe",
             "packages": [
                 "."
             ]
@@ -211,7 +272,7 @@
         {
             "name": "github.com/rai-project/auth",
             "branch": "master",
-            "revision": "1a3a14a2d24344018cd527ef25f879c517f5ab49",
+            "revision": "da1b1a1e4559330884a054adbff5e31cb8df83ef",
             "packages": [
                 "."
             ]
@@ -219,7 +280,7 @@
         {
             "name": "github.com/rai-project/aws",
             "branch": "master",
-            "revision": "72e45597b74b64419bcf7cc8b5399c34608538cf",
+            "revision": "7cd43992a12d1c7e2f90274b4653fafc5426f879",
             "packages": [
                 "."
             ]
@@ -227,7 +288,7 @@
         {
             "name": "github.com/rai-project/broker",
             "branch": "master",
-            "revision": "f89f793718ba7317c16432c15426105c3c616c05",
+            "revision": "24dc79bf0386ef9202a4d0a044c1a0b4080e3d26",
             "packages": [
                 ".",
                 "sqs"
@@ -236,7 +297,7 @@
         {
             "name": "github.com/rai-project/config",
             "branch": "master",
-            "revision": "aaa7c06b6f064cba801824391bc4799ea95180ac",
+            "revision": "f8a49ec22a733f4babae58df93879c1eef06f856",
             "packages": [
                 "."
             ]
@@ -244,7 +305,7 @@
         {
             "name": "github.com/rai-project/godotenv",
             "branch": "master",
-            "revision": "49a98d71a654e5f90239723ae80518a1e234bdd5",
+            "revision": "4eea5d4863542334d540a85cbd0ce558ca30d90c",
             "packages": [
                 "."
             ]
@@ -252,7 +313,7 @@
         {
             "name": "github.com/rai-project/logger",
             "branch": "master",
-            "revision": "03464c07fcdd71ef8f4f86106a93901aa6272de5",
+            "revision": "c503a9575b4139beecc26a0fc3038594bdfb63e8",
             "packages": [
                 "."
             ]
@@ -260,7 +321,7 @@
         {
             "name": "github.com/rai-project/ratelimit",
             "branch": "master",
-            "revision": "ac43a2af4caaed9cab99d9a9f0d5a4da431c5fef",
+            "revision": "db4493a5b8a29180d3930afd59dea840cb264be7",
             "packages": [
                 "."
             ]
@@ -268,7 +329,7 @@
         {
             "name": "github.com/rai-project/serializer",
             "branch": "master",
-            "revision": "ceffa16a90b246c83b2c92de8409b013b44081bb",
+            "revision": "47a0b7526029cf6dfe371051960bc11b0d40ae42",
             "packages": [
                 ".",
                 "bson",
@@ -276,9 +337,18 @@
             ]
         },
         {
+            "name": "github.com/rai-project/store",
+            "branch": "master",
+            "revision": "8bcdeb85e5af6d0dee73b4fb6a7c7360f7dea9cf",
+            "packages": [
+                ".",
+                "s3"
+            ]
+        },
+        {
             "name": "github.com/rai-project/user",
             "branch": "master",
-            "revision": "bade2d00e073f12c74ad72c106cf50acd13e6075",
+            "revision": "002682999d257c536dfdffb6c540387cba94ea2c",
             "packages": [
                 "."
             ]
@@ -286,7 +356,7 @@
         {
             "name": "github.com/rai-project/uuid",
             "branch": "master",
-            "revision": "3d7dffa61a8cdf7eae67c953c2f6aad1210ce8eb",
+            "revision": "98e6b541d057d872a4efa4fe925c66a80a42c206",
             "packages": [
                 "."
             ]
@@ -294,7 +364,7 @@
         {
             "name": "github.com/rai-project/vipertags",
             "branch": "master",
-            "revision": "c548926ed2e6b30c7bd8020849e386ea9d4d15c4",
+            "revision": "918eb5088d4a3abf31fb6aac339fd1196ceee2a9",
             "packages": [
                 "."
             ]
@@ -310,7 +380,7 @@
         {
             "name": "github.com/spf13/afero",
             "branch": "master",
-            "revision": "72b31426848c6ef12a7a8e216708cb0d1530f074",
+            "revision": "9be650865eab0c12963d8753212f4f9c66cdcf12",
             "packages": [
                 ".",
                 "mem"
@@ -319,7 +389,7 @@
         {
             "name": "github.com/spf13/cast",
             "branch": "master",
-            "revision": "d1139bab1c07d5ad390a65e7305876b3c1a8370b",
+            "revision": "f820543c3592e283e311a60d2a600a664e39f6f7",
             "packages": [
                 "."
             ]
@@ -343,9 +413,17 @@
         {
             "name": "github.com/spf13/viper",
             "branch": "master",
-            "revision": "5ed0fc31f7f453625df314d8e66b9791e8d13003",
+            "revision": "7538d73b4eb9511d85a9f1dfef202eeb8ac260f4",
             "packages": [
                 "."
+            ]
+        },
+        {
+            "name": "github.com/stretchr/testify",
+            "version": "v1.1.4",
+            "revision": "69483b4bd14f5845b5a1e55bca19e954e827f1d0",
+            "packages": [
+                "assert"
             ]
         },
         {
@@ -360,17 +438,26 @@
             ]
         },
         {
+            "name": "golang.org/x/net",
+            "branch": "master",
+            "revision": "906cda9512f77671ab44f8c8563b13a8e707b230",
+            "packages": [
+                "context"
+            ]
+        },
+        {
             "name": "golang.org/x/sys",
             "branch": "master",
-            "revision": "075e574b89e4c2d22f2286a7e2b919519c6f3547",
+            "revision": "e4594059fe4cde2daf423055a596c2cd1e6c9adf",
             "packages": [
-                "unix"
+                "unix",
+                "windows"
             ]
         },
         {
             "name": "golang.org/x/text",
             "branch": "master",
-            "revision": "85c29909967d7f171f821e7a42e7b7af76fb9598",
+            "revision": "0ad425fe45e885577bef05dc1c50f72e33188b16",
             "packages": [
                 "internal/gen",
                 "internal/triegen",
