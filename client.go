@@ -81,8 +81,10 @@ func (c *client) Validate() error {
 		return errors.Errorf("the build file [%v] does not exist", buildFilePath)
 	}
 
-	if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
-		return err
+	if !config.IsDebug {
+		if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
+			return err
+		}
 	}
 
 	// Create an AWS session
