@@ -105,7 +105,7 @@ func (c *client) Validate() error {
 
 func (c *client) resultHandler(pub broker.Publication) error {
 	msg := pub.Message()
-	pp.Println(string(msg.Body))
+	pp.Println("body = ", string(msg.Body))
 	return nil
 }
 
@@ -114,8 +114,6 @@ func (c *client) Upload() error {
 		log.Fatal("Expecting the awsSession to be set. Call Init before calling Upload")
 		return errors.New("invalid usage")
 	}
-
-	color.Yellow("✱ Uploading your project directory. This may take a few minutes.")
 
 	store, err := s3.New(
 		s3.Session(c.awsSession),
@@ -135,10 +133,13 @@ func (c *client) Upload() error {
 
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + ".tar." + archive.Config.CompressionFormatString
 
+	color.Yellow("✱ Uploading your project directory. This may take a few minutes.")
+
 	key, err := store.UploadFrom(
 		zippedReader,
 		uploadKey,
 		s3.Expiration(DefaultUploadExpiration),
+		s3.Metadata(*c.profile),
 	)
 	if err != nil {
 		return err
