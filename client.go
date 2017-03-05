@@ -8,6 +8,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/fatih/color"
 	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
@@ -114,6 +115,8 @@ func (c *client) Upload() error {
 		return errors.New("invalid usage")
 	}
 
+	color.Yellow("✱ Uploading your project directory. This may take a few minutes.")
+
 	store, err := s3.New(
 		s3.Session(c.awsSession),
 		store.Bucket(Config.UploadBucketName),
@@ -121,6 +124,8 @@ func (c *client) Upload() error {
 	if err != nil {
 		return err
 	}
+
+	color.Yellow("✱ Preparing your project directory for upload.")
 
 	zippedReader, err := archive.Zip(c.options.directory)
 	if err != nil {
@@ -139,6 +144,8 @@ func (c *client) Upload() error {
 		return err
 	}
 	c.uploadKey = key
+
+	color.Green("✱ Folder uploaded. Server is now processing your submission.")
 
 	return nil
 }
@@ -172,6 +179,8 @@ func (c *client) Init() error {
 		return err
 	}
 
+	color.Green("✱ Your job request has been posted to the queue.")
+
 	subscriber, err := brkr.Subscribe(
 		"log-"+c.ID,
 		c.resultHandler,
@@ -201,10 +210,14 @@ func (c *client) Disconnect() error {
 	for _, sub := range c.subscribers {
 		sub.Unsubscribe()
 	}
+
 	return c.broker.Disconnect()
 }
 
 func (c *client) authenticate(profilePath string) error {
+
+	color.Green("✱ Checking your athentication credentials.")
+
 	prof, err := user.NewProfile(profilePath)
 	if err != nil {
 		return err
