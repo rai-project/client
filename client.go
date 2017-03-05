@@ -93,7 +93,7 @@ func (c *client) Validate() error {
 		aws.Region(aws.AWSRegionUSEast1),
 		aws.EncryptedAccessKey(aws.Config.AccessKey),
 		aws.EncryptedSecretKey(aws.Config.SecretKey),
-		aws.Sts(),
+		aws.Sts(c.ID),
 	)
 	if err != nil {
 		return err
