@@ -1,6 +1,7 @@
 package client
 
 import (
+	"io"
 	"os"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fatih/color"
 	"github.com/k0kubun/pp"
+	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
 	"github.com/rai-project/aws"
@@ -22,6 +24,7 @@ import (
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/user"
 	"github.com/rai-project/uuid"
+	"github.com/spf13/viper"
 )
 
 type client struct {
@@ -35,19 +38,31 @@ type client struct {
 	subscribers []broker.Subscriber
 }
 
+type nopWriterCloser struct {
+	io.Writer
+}
+
+func (nopWriterCloser) Close() error { return nil }
+
 var (
 	DefaultUploadExpiration = time.Now().AddDate(0, 0, 1) // tomorrow
 )
 
 func New(opts ...Option) (*client, error) {
+	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
+	if viper.GetBool("app.color") {
+		out = colorable.NewNonColorable(out)
+		err = colorable.NewNonColorable(err)
+	}
+
 	options := Options{
 		directory:         "",
 		isSubmission:      false,
 		buildFileBaseName: Config.BuildFileBaseName,
 		ratelimit:         ratelimit.Config.RateLimit,
 		profilePath:       user.DefaultProfilePath,
-		stdout:            os.Stdout,
-		stderr:            os.Stderr,
+		stdout:            nopWriterCloser{out},
+		stderr:            nopWriterCloser{err},
 	}
 
 	for _, o := range opts {
