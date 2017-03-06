@@ -8,8 +8,12 @@ import:
   version: ~1.7.3
   subpackages:
   - aws/session
+- package: github.com/fatih/color
+  version: ~1.4.0
 - package: github.com/k0kubun/pp
   version: ~2.3.0
+- package: github.com/mattn/go-colorable
+  version: ~0.0.7
 - package: github.com/pkg/errors
   version: ~0.8.0
 - package: github.com/rai-project/archive
@@ -29,6 +33,7 @@ import:
 - package: github.com/rai-project/user
 - package: github.com/rai-project/uuid
 - package: github.com/rai-project/vipertags
+- package: github.com/spf13/viper
 testImport:
 - package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify

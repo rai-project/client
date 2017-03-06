@@ -1,5 +1,5 @@
 {
-    "memo": "c44c5d0e18f32f7dbc9aa0a0b2524e44d53c0e4282f38576704419bd137df185",
+    "memo": "6b2367ae723f4ad397c9d9ded27fafaa5f082ca3b69627324175137ca3259c36",
     "projects": [
         {
             "name": "github.com/BurntSushi/toml",
@@ -112,6 +112,14 @@
             "name": "github.com/dustin/go-humanize",
             "branch": "master",
             "revision": "7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/facebookgo/stack",
+            "branch": "master",
+            "revision": "751773369052141c013c6e827a71e8f35c07879c",
             "packages": [
                 "."
             ]
@@ -280,7 +288,7 @@
         {
             "name": "github.com/rai-project/aws",
             "branch": "master",
-            "revision": "4d3ab9298078209f659139055c51f337defcbd34",
+            "revision": "2a0df296fdffd6a212334de35c2130f78e8918ee",
             "packages": [
                 "."
             ]
@@ -288,7 +296,7 @@
         {
             "name": "github.com/rai-project/broker",
             "branch": "master",
-            "revision": "24dc79bf0386ef9202a4d0a044c1a0b4080e3d26",
+            "revision": "8231018b359efa8451ddefd26ec8ba1e26577af5",
             "packages": [
                 ".",
                 "sqs"
@@ -297,7 +305,7 @@
         {
             "name": "github.com/rai-project/config",
             "branch": "master",
-            "revision": "89e25e39258e3ce3660488e913fcc5c3c52095d4",
+            "revision": "f142de4f1e9287bc9b77897377032488b8277fed",
             "packages": [
                 "."
             ]
@@ -313,7 +321,7 @@
         {
             "name": "github.com/rai-project/logger",
             "branch": "master",
-            "revision": "c503a9575b4139beecc26a0fc3038594bdfb63e8",
+            "revision": "8b469e1ecd58f4e21cebfb56cfaaba4220b355d5",
             "packages": [
                 "."
             ]
@@ -339,7 +347,7 @@
         {
             "name": "github.com/rai-project/store",
             "branch": "master",
-            "revision": "8bcdeb85e5af6d0dee73b4fb6a7c7360f7dea9cf",
+            "revision": "0e7ba7543e49dc576fe0ccbb9bb77936aa47710c",
             "packages": [
                 ".",
                 "s3"
@@ -356,7 +364,7 @@
         {
             "name": "github.com/rai-project/utils",
             "branch": "master",
-            "revision": "922749d8ae305e9a29f8384a211878890b9cdb9a",
+            "revision": "87ed878e71d0e3072193907f6677def4a3222a38",
             "packages": [
                 "."
             ]
@@ -372,7 +380,7 @@
         {
             "name": "github.com/rai-project/vipertags",
             "branch": "master",
-            "revision": "918eb5088d4a3abf31fb6aac339fd1196ceee2a9",
+            "revision": "5d4945c50b8c10708e9f3659a55f4b2bb1b1a17c",
             "packages": [
                 "."
             ]
