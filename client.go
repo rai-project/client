@@ -161,6 +161,7 @@ func (c *client) Upload() error {
 			"profile":    c.profile,
 			"created_at": time.Now(),
 		}),
+		s3.MimeType(archive.MimeType()),
 	)
 	if err != nil {
 		return err
