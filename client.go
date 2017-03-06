@@ -7,6 +7,8 @@ import (
 
 	"path/filepath"
 
+	"fmt"
+
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fatih/color"
@@ -138,7 +140,7 @@ func (c *client) Upload() error {
 		return err
 	}
 
-	color.Yellow("✱ Preparing your project directory for upload.")
+	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Preparing your project directory for upload."))
 
 	zippedReader, err := archive.Zip(c.options.directory)
 	if err != nil {
@@ -148,7 +150,7 @@ func (c *client) Upload() error {
 
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + ".tar." + archive.Config.CompressionFormatString
 
-	color.Yellow("✱ Uploading your project directory. This may take a few minutes.")
+	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
 	key, err := store.UploadFrom(
 		zippedReader,
@@ -161,7 +163,7 @@ func (c *client) Upload() error {
 	}
 	c.uploadKey = key
 
-	color.Green("✱ Folder uploaded. Server is now processing your submission.")
+	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Folder uploaded. Server is now processing your submission."))
 
 	return nil
 }
@@ -195,7 +197,7 @@ func (c *client) Init() error {
 		return err
 	}
 
-	color.Green("✱ Your job request has been posted to the queue.")
+	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Your job request has been posted to the queue."))
 
 	subscriber, err := brkr.Subscribe(
 		"log-"+c.ID,
@@ -232,7 +234,7 @@ func (c *client) Disconnect() error {
 
 func (c *client) authenticate(profilePath string) error {
 
-	color.Green("✱ Checking your athentication credentials.")
+	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your athentication credentials."))
 
 	prof, err := user.NewProfile(profilePath)
 	if err != nil {
