@@ -156,7 +156,11 @@ func (c *client) Upload() error {
 		zippedReader,
 		uploadKey,
 		s3.Expiration(DefaultUploadExpiration),
-		s3.Metadata(*c.profile),
+		s3.Metadata(map[string]interface{}{
+			"id":         c.ID,
+			"profile":    c.profile,
+			"created_at": time.Now(),
+		}),
 	)
 	if err != nil {
 		return err
