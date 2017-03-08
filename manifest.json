@@ -9,6 +9,9 @@
         "github.com/aws/aws-sdk-go": {
             "branch": "master"
         },
+        "github.com/cheggaaa/pb": {
+            "branch": "master"
+        },
         "github.com/fatih/color": {
             "branch": "master"
         },
@@ -52,6 +55,9 @@
             "branch": "master"
         },
         "github.com/rai-project/vipertags": {
+            "branch": "master"
+        },
+        "github.com/spf13/afero": {
             "branch": "master"
         },
         "github.com/spf13/viper": {
