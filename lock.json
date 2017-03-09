@@ -1,5 +1,5 @@
 {
-    "memo": "b017669dc7f954f9a0c450a54480e35bb7351141976c6d06ade0ac4088c99da0",
+    "memo": "b17afefc97dfa04328ed0b8723987ede5c4327ea0b624efbddff200d39eacbaa",
     "projects": [
         {
             "name": "github.com/BurntSushi/toml",
@@ -75,14 +75,6 @@
                 "service/s3/s3manager",
                 "service/sqs",
                 "service/sts"
-            ]
-        },
-        {
-            "name": "github.com/cheggaaa/pb",
-            "branch": "master",
-            "revision": "d7e6ca3010b6f084d8056847f55d7f572f180678",
-            "packages": [
-                "."
             ]
         },
         {
@@ -216,14 +208,6 @@
             "name": "github.com/mattn/go-isatty",
             "branch": "master",
             "revision": "dda3de49cbfcec471bd7a70e6cc01fcc3ff90109",
-            "packages": [
-                "."
-            ]
-        },
-        {
-            "name": "github.com/mattn/go-runewidth",
-            "branch": "master",
-            "revision": "14207d285c6c197daabb5c9793d63e7af9ab2d50",
             "packages": [
                 "."
             ]

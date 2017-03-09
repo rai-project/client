@@ -3,18 +3,14 @@ package client
 import (
 	"io"
 	"os"
-	"runtime"
 	"time"
 
 	"path/filepath"
 
 	"fmt"
 
-	"path"
-
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/cheggaaa/pb"
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
@@ -29,7 +25,6 @@ import (
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/user"
 	"github.com/rai-project/uuid"
-	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
 
@@ -136,7 +131,7 @@ func (c *client) Upload() error {
 		return errors.New("invalid usage")
 	}
 
-	store, err := s3.New(
+	st, err := s3.New(
 		s3.Session(c.awsSession),
 		store.Bucket(Config.UploadBucketName),
 	)
@@ -154,61 +149,10 @@ func (c *client) Upload() error {
 
 	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
-	// create progress reader
-	memoryFileSystem := afero.NewMemMapFs()
-	file, err := memoryFileSystem.Create(c.ID + ".tar." + archive.Config.CompressionFormatString)
-	if err != nil {
-		log.WithError(err).Errorf("cannot create %v memory fs", file.Name())
-		return err
-	}
-	writtenBytes, err := io.Copy(file, zippedReader)
-	if err != nil {
-		log.WithError(err).Errorf("cannot write %v memory fs", file.Name())
-		return err
-	}
-	defer file.Close()
+	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + ".tar." + archive.Config.CompressionFormatString
 
-	// move to the start of the file
-	_, err = file.Seek(0, 0)
-	if err != nil {
-		log.WithError(err).Errorf("cannot seek to start of %v memory fs", file.Name())
-		return err
-	}
-
-	// get the new original progress bar.
-	bar := pb.New64(writtenBytes)
-
-	// Set new human friendly print units.
-	bar.SetUnits(pb.U_BYTES)
-
-	// Set output to be stdout
-	bar.Output = c.options.stdout
-
-	// Show current speed is true.
-	bar.ShowSpeed = true
-
-	// Use different unicodes for Linux, OS X and Windows.
-	switch runtime.GOOS {
-	case "linux":
-		// Need to add '\x00' as delimiter for unicode characters.
-		bar.Format("┃\x00▓\x00█\x00░\x00┃")
-	case "darwin":
-		// Need to add '\x00' as delimiter for unicode characters.
-		bar.Format(" \x00▓\x00 \x00░\x00 ")
-	default:
-		// Default to non unicode characters.
-		bar.Format("[=> ]")
-	}
-
-	bar.Start()
-	defer bar.FinishPrint(color.GreenString("✱ Folder uploaded. Server is now processing your submission."))
-
-	reader := bar.NewProxyReader(file)
-
-	uploadKey := Config.UploadDestinationDirectory + "/" + path.Base(file.Name())
-
-	key, err := store.UploadFrom(
-		reader,
+	key, err := st.UploadFrom(
+		zippedReader,
 		uploadKey,
 		s3.Expiration(DefaultUploadExpiration),
 		s3.Metadata(map[string]interface{}{
@@ -217,6 +161,8 @@ func (c *client) Upload() error {
 			"created_at": time.Now(),
 		}),
 		s3.ContentType(archive.MimeType()),
+		store.UploadProgressOutput(c.options.stdout),
+		store.UploadProgressFinishMessage(color.GreenString("✱ Folder uploaded. Server is now processing your submission.")),
 	)
 	if err != nil {
 		return err

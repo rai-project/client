@@ -8,8 +8,6 @@ import:
   version: ~1.7.5
   subpackages:
   - aws/session
-- package: github.com/cheggaaa/pb
-  version: ~1.0.9
 - package: github.com/fatih/color
   version: ~1.4.1
 - package: github.com/k0kubun/pp
@@ -35,7 +33,6 @@ import:
 - package: github.com/rai-project/user
 - package: github.com/rai-project/uuid
 - package: github.com/rai-project/vipertags
-- package: github.com/spf13/afero
 - package: github.com/spf13/viper
 testImport:
 - package: github.com/GeertJohan/go-sourcepath
