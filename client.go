@@ -221,11 +221,11 @@ func (c *client) PublishSubscribe() error {
 
 	redisConn, err := redis.New()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create a redis connection")
 	}
 	subscriber, err := redis.NewSubscriber(redisConn, config.App.Name+"/log-"+c.ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "cannot create redis subscriber")
 	}
 
 	msgs := subscriber.Start()

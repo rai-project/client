@@ -16,30 +16,37 @@ func TestClient(t *testing.T) {
 		BuildFileBaseName("rai_build"),
 		DisableRatelimit(),
 	)
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 	assert.NotNil(t, clt)
 
 	err = clt.Validate()
 	assert.NoError(t, err)
 
 	err = clt.PublishSubscribe()
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 
 	err = clt.Upload()
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 	assert.NotEmpty(t, clt.uploadKey, "upload key must be set after upload")
 
 	err = clt.Connect()
-	assert.NoError(t, err)
+	if !assert.NoError(t, err) {
+		return
+	}
 
 	defer clt.Disconnect()
 }
 
 func TestMain(m *testing.M) {
-	os.Setenv("DEBUG", "TRUE")
-	os.Setenv("VERBOSE", "TRUE")
-	config.Init()
-	config.IsVerbose = true
-	config.IsDebug = true
+	config.Init(
+		config.VerboseMode(true),
+		config.DebugMode(true),
+	)
 	os.Exit(m.Run())
 }
