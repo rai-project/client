@@ -248,11 +248,11 @@ func (c *client) authenticate(profilePath string) error {
 	var err error
 	var prof auth.Profile
 
-	provider := strings.ToLower(auth.Config.Provider)
+	provider := auth.Provider(strings.ToLower(auth.Config.Provider))
 	switch provider {
-	case "auth0":
+	case auth.Auth0Provider:
 		prof, err = auth0.NewProfile(auth.ProfilePath(profilePath))
-	case "secret":
+	case auth.SecretProvider:
 		prof, err = secret.NewProfile(auth.ProfilePath(profilePath))
 	default:
 		err = errors.Errorf("the auth provider %v specified is not supported", provider)
