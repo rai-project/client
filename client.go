@@ -2,6 +2,7 @@ package client
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -23,14 +24,16 @@ import (
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
+	"github.com/rai-project/model"
 	"github.com/rai-project/pubsub"
 	"github.com/rai-project/pubsub/redis"
 	"github.com/rai-project/ratelimit"
+	"github.com/rai-project/serializer"
 	"github.com/rai-project/serializer/json"
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
-	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 )
 
 type client struct {
@@ -42,7 +45,9 @@ type client struct {
 	pubsubConn  pubsub.Connection
 	profile     auth.Profile
 	isConnected bool
+	serializer  serializer.Serializer
 	subscribers []pubsub.Subscriber
+	buildSpec   model.BuildSpecification
 }
 
 type nopWriterCloser struct {
@@ -57,7 +62,7 @@ var (
 
 func New(opts ...Option) (*client, error) {
 	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
-	if viper.GetBool("app.color") {
+	if !config.App.Color {
 		out = colorable.NewNonColorable(out)
 		err = colorable.NewNonColorable(err)
 	}
@@ -88,6 +93,7 @@ func New(opts ...Option) (*client, error) {
 		ID:          uuid.NewV4(),
 		isConnected: false,
 		options:     options,
+		serializer:  json.New(),
 	}, nil
 }
 
@@ -102,6 +108,15 @@ func (c *client) Validate() error {
 	buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
 	if !com.IsFile(buildFilePath) {
 		return errors.Errorf("the build file [%v] does not exist", buildFilePath)
+	}
+
+	buf, err := ioutil.ReadFile(buildFilePath)
+	if err != nil {
+		return errors.Wrapf(err, "unable to read %v", buildFilePath)
+	}
+
+	if err := yaml.Unmarshal(buf, &c.buildSpec); err != nil {
+		return errors.Wrapf(err, "unable to parse %v", buildFilePath)
 	}
 
 	if !config.IsDebug {
@@ -187,18 +202,31 @@ func (c *client) Upload() error {
 }
 
 func (c *client) PublishSubscribe() error {
+
+	profile := c.profile.Info()
+
+	jobRequest := model.JobRequest{
+		Base: model.Base{
+			ID:        c.ID,
+			CreatedAt: time.Now(),
+		},
+		User:               profile.User,
+		BuildSpecification: c.buildSpec,
+	}
+	body, err := c.serializer.Marshal(jobRequest)
+	if err != nil {
+		return err
+	}
+
 	brkr, err := sqs.New(
 		sqs.QueueName(config.App.Name),
-		broker.Serializer(json.New()),
+		broker.Serializer(c.serializer),
 		sqs.Session(c.awsSession),
 	)
 	if err != nil {
 		return err
 	}
 	c.broker = brkr
-
-	profile := c.profile.Info()
-
 	err = brkr.Publish(
 		config.App.Name,
 		&broker.Message{
@@ -210,7 +238,7 @@ func (c *client) PublishSubscribe() error {
 				"user_access_key": profile.AccessKey,
 				"user_secret_key": profile.SecretKey,
 			},
-			Body: []byte("data"),
+			Body: body,
 		},
 	)
 	if err != nil {
