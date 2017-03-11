@@ -3,6 +3,7 @@ package client
 import (
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"path/filepath"
@@ -15,6 +16,9 @@ import (
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
+	"github.com/rai-project/auth"
+	"github.com/rai-project/auth/auth0"
+	"github.com/rai-project/auth/secret"
 	"github.com/rai-project/aws"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
@@ -23,7 +27,6 @@ import (
 	"github.com/rai-project/serializer/json"
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
-	"github.com/rai-project/user"
 	"github.com/rai-project/uuid"
 	"github.com/spf13/viper"
 )
@@ -34,7 +37,7 @@ type client struct {
 	awsSession  *session.Session
 	options     Options
 	broker      broker.Broker
-	profile     *user.Profile
+	profile     auth.Profile
 	isConnected bool
 	subscribers []broker.Subscriber
 }
@@ -61,7 +64,7 @@ func New(opts ...Option) (*client, error) {
 		isSubmission:      false,
 		buildFileBaseName: Config.BuildFileBaseName,
 		ratelimit:         ratelimit.Config.RateLimit,
-		profilePath:       user.DefaultProfilePath,
+		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
 		stderr:            nopWriterCloser{err},
 	}
@@ -157,7 +160,7 @@ func (c *client) Upload() error {
 		s3.Expiration(DefaultUploadExpiration),
 		s3.Metadata(map[string]interface{}{
 			"id":         c.ID,
-			"profile":    c.profile,
+			"profile":    c.profile.Info(),
 			"created_at": time.Now(),
 		}),
 		s3.ContentType(archive.MimeType()),
@@ -183,6 +186,8 @@ func (c *client) Init() error {
 	}
 	c.broker = brkr
 
+	profile := c.profile.Info()
+
 	err = brkr.Publish(
 		"rai",
 		&broker.Message{
@@ -190,9 +195,9 @@ func (c *client) Init() error {
 			Header: map[string]string{
 				"id":              c.ID,
 				"upload_key":      c.uploadKey,
-				"username":        c.profile.Username,
-				"user_access_key": c.profile.AccessKey,
-				"user_secret_key": c.profile.SecretKey,
+				"username":        profile.Username,
+				"user_access_key": profile.AccessKey,
+				"user_secret_key": profile.SecretKey,
 			},
 			Body: []byte("data"),
 		},
@@ -240,11 +245,26 @@ func (c *client) authenticate(profilePath string) error {
 
 	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your athentication credentials."))
 
-	prof, err := user.NewProfile(profilePath)
+	var err error
+	var prof auth.Profile
+
+	provider := strings.ToLower(auth.Config.Provider)
+	switch provider {
+	case "auth0":
+		prof, err = auth0.NewProfile(auth.ProfilePath(profilePath))
+	case "secret":
+		prof, err = secret.NewProfile(auth.ProfilePath(profilePath))
+	default:
+		err = errors.Errorf("the auth provider %v specified is not supported", provider)
+	}
 	if err != nil {
 		return err
 	}
-	ok := prof.Verify()
+
+	ok, err := prof.Verify()
+	if err != nil {
+		return err
+	}
 	if !ok {
 		return errors.Errorf("cannot authenticate using the credentials in %v", profilePath)
 	}
