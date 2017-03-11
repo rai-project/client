@@ -22,7 +22,7 @@ func TestClient(t *testing.T) {
 	err = clt.Validate()
 	assert.NoError(t, err)
 
-	err = clt.Init()
+	err = clt.PublishSubscribe()
 	assert.NoError(t, err)
 
 	err = clt.Upload()

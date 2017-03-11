@@ -23,6 +23,8 @@ import (
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
+	"github.com/rai-project/pubsub"
+	"github.com/rai-project/pubsub/redis"
 	"github.com/rai-project/ratelimit"
 	"github.com/rai-project/serializer/json"
 	"github.com/rai-project/store"
@@ -37,9 +39,10 @@ type client struct {
 	awsSession  *session.Session
 	options     Options
 	broker      broker.Broker
+	pubsubConn  pubsub.Connection
 	profile     auth.Profile
 	isConnected bool
-	subscribers []broker.Subscriber
+	subscribers []pubsub.Subscriber
 }
 
 type nopWriterCloser struct {
@@ -122,9 +125,17 @@ func (c *client) Validate() error {
 	return nil
 }
 
-func (c *client) resultHandler(pub broker.Publication) error {
-	// msg := pub.Message()
-	// pp.Println("body = ", string(msg.Body))
+func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
+	go func() {
+		for msg := range msgs {
+			var data string
+			err := msg.Unmarshal(&data)
+			if err != nil {
+				continue
+			}
+			fmt.Print(data)
+		}
+	}()
 	return nil
 }
 
@@ -175,7 +186,7 @@ func (c *client) Upload() error {
 	return nil
 }
 
-func (c *client) Init() error {
+func (c *client) PublishSubscribe() error {
 	brkr, err := sqs.New(
 		sqs.QueueName(config.App.Name),
 		broker.Serializer(json.New()),
@@ -189,7 +200,7 @@ func (c *client) Init() error {
 	profile := c.profile.Info()
 
 	err = brkr.Publish(
-		"rai",
+		config.App.Name,
 		&broker.Message{
 			ID: c.ID,
 			Header: map[string]string{
@@ -208,14 +219,17 @@ func (c *client) Init() error {
 
 	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Your job request has been posted to the queue."))
 
-	subscriber, err := brkr.Subscribe(
-		"log-"+c.ID,
-		c.resultHandler,
-		broker.AutoAck(true),
-	)
+	redisConn, err := redis.New()
 	if err != nil {
 		return err
 	}
+	subscriber, err := redis.NewSubscriber(redisConn, config.App.Name+"/log-"+c.ID)
+	if err != nil {
+		return err
+	}
+
+	msgs := subscriber.Start()
+	c.resultHandler(msgs)
 
 	c.subscribers = append(c.subscribers, subscriber)
 
@@ -234,8 +248,13 @@ func (c *client) Disconnect() error {
 	if !c.isConnected {
 		return nil
 	}
+
 	for _, sub := range c.subscribers {
-		sub.Unsubscribe()
+		sub.Stop()
+	}
+
+	if c.pubsubConn != nil {
+		c.pubsubConn.Close()
 	}
 
 	return c.broker.Disconnect()
