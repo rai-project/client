@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"strings"
 	"time"
 
 	"path/filepath"
@@ -18,8 +17,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
 	"github.com/rai-project/auth"
-	"github.com/rai-project/auth/auth0"
-	"github.com/rai-project/auth/secret"
+	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/aws"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
@@ -317,18 +315,7 @@ func (c *client) authenticate(profilePath string) error {
 
 	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your athentication credentials."))
 
-	var err error
-	var prof auth.Profile
-
-	provider := auth.Provider(strings.ToLower(auth.Config.Provider))
-	switch provider {
-	case auth.Auth0Provider:
-		prof, err = auth0.NewProfile(auth.ProfilePath(profilePath))
-	case auth.SecretProvider:
-		prof, err = secret.NewProfile(auth.ProfilePath(profilePath))
-	default:
-		err = errors.Errorf("the auth provider %v specified is not supported", provider)
-	}
+	prof, err := provider.New(auth.ProfilePath(profilePath))
 	if err != nil {
 		return err
 	}
