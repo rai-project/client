@@ -76,6 +76,7 @@ func New(opts ...Option) (*client, error) {
 		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
 		stderr:            nopWriterCloser{err},
+		jobQueueName:      config.App.Name,
 	}
 
 	for _, o := range opts {
@@ -227,7 +228,7 @@ func (c *client) PublishSubscribe() error {
 	}
 
 	brkr, err := sqs.New(
-		sqs.QueueName(config.App.Name),
+		sqs.QueueName(c.options.jobQueueName),
 		broker.Serializer(c.serializer),
 		sqs.Session(c.awsSession),
 	)

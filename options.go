@@ -11,6 +11,7 @@ type Options struct {
 	ratelimit         time.Duration
 	stdout            io.WriteCloser
 	stderr            io.WriteCloser
+	jobQueueName      string
 }
 
 type Option func(*Options)
@@ -58,5 +59,11 @@ func Stdout(s io.WriteCloser) Option {
 func Stderr(s io.WriteCloser) Option {
 	return func(o *Options) {
 		o.stderr = s
+	}
+}
+
+func JobQueueName(s string) Option {
+	return func(o *Options) {
+		o.jobQueueName = s
 	}
 }
