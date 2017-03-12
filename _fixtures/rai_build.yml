@@ -1,13 +1,11 @@
 
 rai:
   version: 0.2 # this is required
-  image: webgpu/rai:root # webgpu/rai:root is a docker image which can
-                         # be viewed at https://hub.docker.com/r/webgpu/rai/
+  image: ubuntu:16.10
 resources:
-  gpus: 1 # currently required to be 1
+  # gpus: 1 # currently required to be 1
 commands:
   build:
     - echo "Building project"
-    - cmake -DCONFIG_USE_HUNTER=OFF /src
-    - make
-    - ./ece408 /src/data/test10.hdf5 /src/data/model.hdf5 10
+    - echo "XX"
+    - echo "DDDt"

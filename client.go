@@ -48,6 +48,7 @@ type client struct {
 	serializer  serializer.Serializer
 	subscribers []pubsub.Subscriber
 	buildSpec   model.BuildSpecification
+	done        chan bool
 }
 
 type nopWriterCloser struct {
@@ -94,6 +95,7 @@ func New(opts ...Option) (*client, error) {
 		isConnected: false,
 		options:     options,
 		serializer:  json.New(),
+		done:        make(chan bool),
 	}, nil
 }
 
@@ -143,13 +145,19 @@ func (c *client) Validate() error {
 func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 	go func() {
 		for msg := range msgs {
-			var data string
+			var data model.JobResponse
 			err := msg.Unmarshal(&data)
 			if err != nil {
+				log.WithError(err).Debug("failed to unmarshal response data")
 				continue
 			}
-			fmt.Print(data)
+			if data.Kind == model.StderrResponse {
+				fmt.Fprintln(c.options.stderr, string(data.Body))
+			} else if data.Kind == model.StdoutResponse {
+				fmt.Fprintln(c.options.stderr, string(data.Body))
+			}
 		}
+		c.done <- true
 	}()
 	return nil
 }
@@ -286,6 +294,11 @@ func (c *client) Disconnect() error {
 	}
 
 	return c.broker.Disconnect()
+}
+
+func (c *client) Wait() error {
+	<-c.done
+	return nil
 }
 
 func (c *client) authenticate(profilePath string) error {
