@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"path/filepath"
@@ -13,6 +14,7 @@ import (
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fatih/color"
+	"github.com/k0kubun/pp"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
@@ -145,10 +147,14 @@ func (c *client) Validate() error {
 
 func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {
+		body := strings.TrimSpace(string(resp.Body))
+		if body == "" {
+			return
+		}
 		if config.IsVerbose {
 			fmt.Fprint(w, "[ "+resp.CreatedAt.String()+"] ")
 		}
-		fmt.Fprintln(w, string(resp.Body))
+		fmt.Fprintln(w, body)
 	}
 	go func() {
 		for msg := range msgs {
@@ -230,6 +236,8 @@ func (c *client) PublishSubscribe() error {
 		User:               profile.User,
 		BuildSpecification: c.buildSpec,
 	}
+	pp.Println(c.uploadKey)
+
 	body, err := c.serializer.Marshal(jobRequest)
 	if err != nil {
 		return err
