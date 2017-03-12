@@ -58,7 +58,9 @@ type nopWriterCloser struct {
 func (nopWriterCloser) Close() error { return nil }
 
 var (
-	DefaultUploadExpiration = time.Now().AddDate(0, 0, 1) // tomorrow
+	DefaultUploadExpiration = func() time.Time {
+		return time.Now().AddDate(0, 0, 1) // tomorrow
+	}
 )
 
 func New(opts ...Option) (*client, error) {
@@ -144,6 +146,12 @@ func (c *client) Validate() error {
 }
 
 func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
+	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {
+		if config.IsVerbose {
+			fmt.Fprint(w, "[ "+resp.CreatedAt.String()+"] ")
+		}
+		fmt.Fprintln(w, string(resp.Body))
+	}
 	go func() {
 		for msg := range msgs {
 			var data model.JobResponse
@@ -153,9 +161,9 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 				continue
 			}
 			if data.Kind == model.StderrResponse {
-				fmt.Fprintln(c.options.stderr, string(data.Body))
+				formatPrint(c.options.stderr, data)
 			} else if data.Kind == model.StdoutResponse {
-				fmt.Fprintln(c.options.stderr, string(data.Body))
+				formatPrint(c.options.stderr, data)
 			}
 		}
 		c.done <- true
@@ -192,9 +200,10 @@ func (c *client) Upload() error {
 	key, err := st.UploadFrom(
 		zippedReader,
 		uploadKey,
-		s3.Expiration(DefaultUploadExpiration),
+		s3.Expiration(DefaultUploadExpiration()),
 		s3.Metadata(map[string]interface{}{
 			"id":         c.ID,
+			"type":       "user_upload",
 			"profile":    c.profile.Info(),
 			"created_at": time.Now(),
 		}),
@@ -219,6 +228,7 @@ func (c *client) PublishSubscribe() error {
 			ID:        c.ID,
 			CreatedAt: time.Now(),
 		},
+		UploadKey:          c.uploadKey,
 		User:               profile.User,
 		BuildSpecification: c.buildSpec,
 	}
@@ -260,13 +270,14 @@ func (c *client) PublishSubscribe() error {
 	if err != nil {
 		return errors.Wrap(err, "cannot create a redis connection")
 	}
-	subscriber, err := redis.NewSubscriber(redisConn, config.App.Name+"/log-"+c.ID)
+
+	subscribeChannel := config.App.Name + "/log-" + c.ID
+	subscriber, err := redis.NewSubscriber(redisConn, subscribeChannel)
 	if err != nil {
 		return errors.Wrap(err, "cannot create redis subscriber")
 	}
 
-	msgs := subscriber.Start()
-	c.resultHandler(msgs)
+	c.resultHandler(subscriber.Start())
 
 	c.subscribers = append(c.subscribers, subscriber)
 
