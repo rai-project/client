@@ -24,16 +24,16 @@ func TestClient(t *testing.T) {
 	err = clt.Validate()
 	assert.NoError(t, err)
 
-	err = clt.PublishSubscribe()
-	if !assert.NoError(t, err) {
-		return
-	}
-
 	err = clt.Upload()
 	if !assert.NoError(t, err) {
 		return
 	}
 	assert.NotEmpty(t, clt.uploadKey, "upload key must be set after upload")
+
+	err = clt.PublishSubscribe()
+	if !assert.NoError(t, err) {
+		return
+	}
 
 	err = clt.Connect()
 	if !assert.NoError(t, err) {
