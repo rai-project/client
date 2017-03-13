@@ -133,8 +133,8 @@ func (c *client) Validate() error {
 	// Create an AWS session
 	session, err := aws.NewSession(
 		aws.Region(aws.AWSRegionUSEast1),
-		aws.EncryptedAccessKey(aws.Config.AccessKey),
-		aws.EncryptedSecretKey(aws.Config.SecretKey),
+		aws.AccessKey(aws.Config.AccessKey),
+		aws.SecretKey(aws.Config.SecretKey),
 		aws.Sts(c.ID),
 	)
 	if err != nil {
