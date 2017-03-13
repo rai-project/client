@@ -10,3 +10,4 @@ commands:
     - echo "XX"
     - echo "DDDt"
     - ls -l /src
+    - top
