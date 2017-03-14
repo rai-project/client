@@ -277,6 +277,8 @@ func (c *client) PublishSubscribe() error {
 		return errors.Wrap(err, "cannot create a redis connection")
 	}
 
+	c.pubsubConn = redisConn
+
 	subscribeChannel := config.App.Name + "/log-" + c.ID
 	subscriber, err := redis.NewSubscriber(redisConn, subscribeChannel)
 	if err != nil {
