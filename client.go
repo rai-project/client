@@ -165,7 +165,6 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 				c.spinner.Stop()
 				c.spinner = nil
 			}
-
 			err := msg.Unmarshal(&data)
 			if err != nil {
 				log.WithError(err).Debug("failed to unmarshal response data")
@@ -231,7 +230,7 @@ func (c *client) Upload() error {
 	return nil
 }
 
-func (c *client) PublishSubscribe() error {
+func (c *client) Publish() error {
 
 	profile := c.profile.Info()
 
@@ -284,6 +283,10 @@ func (c *client) PublishSubscribe() error {
 	c.spinner.Writer = c.options.stdout
 	c.spinner.Start()
 
+	return nil
+}
+
+func (c *client) Subscribe() error {
 	redisConn, err := redis.New()
 	if err != nil {
 		return errors.Wrap(err, "cannot create a redis connection")
@@ -300,7 +303,6 @@ func (c *client) PublishSubscribe() error {
 	c.resultHandler(subscriber.Start())
 
 	c.subscribers = append(c.subscribers, subscriber)
-
 	return nil
 }
 
