@@ -224,6 +224,7 @@ func (c *client) Upload() error {
 	if err != nil {
 		return err
 	}
+
 	c.uploadKey = key
 
 	return nil
