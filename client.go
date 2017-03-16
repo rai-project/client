@@ -163,6 +163,7 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 
 			if c.spinner != nil {
 				c.spinner.Stop()
+				c.spinner = nil
 			}
 
 			err := msg.Unmarshal(&data)
