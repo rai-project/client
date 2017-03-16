@@ -1,13 +1,12 @@
-
 rai:
   version: 0.2 # this is required
-  image: ubuntu:16.10 #webgpu.com/rai:root #ubuntu:16.10
+  image: gcc
 resources:
   # gpus: 1 # currently required to be 1
 commands:
   build:
     - echo "Building project"
-    - echo "XX"
-    - echo "DDDt"
-    - ls -l /src
-    - top
+    - which gcc
+    - ls /usr/bin
+    - /usr/bin/gcc /src/main.c
+    - ./a.out
