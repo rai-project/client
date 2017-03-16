@@ -15,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
-	"github.com/k0kubun/pp"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
@@ -243,7 +242,6 @@ func (c *client) PublishSubscribe() error {
 		User:               profile.User,
 		BuildSpecification: c.buildSpec,
 	}
-	pp.Println(c.uploadKey)
 
 	body, err := c.serializer.Marshal(jobRequest)
 	if err != nil {
