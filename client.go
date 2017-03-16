@@ -13,6 +13,7 @@ import (
 
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/k0kubun/pp"
 	colorable "github.com/mattn/go-colorable"
@@ -48,6 +49,7 @@ type client struct {
 	serializer  serializer.Serializer
 	subscribers []pubsub.Subscriber
 	buildSpec   model.BuildSpecification
+	spinner     *spinner.Spinner
 	done        chan bool
 }
 
@@ -159,6 +161,11 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 	go func() {
 		for msg := range msgs {
 			var data model.JobResponse
+
+			if c.spinner != nil {
+				c.spinner.Stop()
+			}
+
 			err := msg.Unmarshal(&data)
 			if err != nil {
 				log.WithError(err).Debug("failed to unmarshal response data")
@@ -271,6 +278,11 @@ func (c *client) PublishSubscribe() error {
 	}
 
 	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Your job request has been posted to the queue."))
+
+	c.spinner = spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	c.spinner.Suffix = " Waiting for the server to process your request..."
+	c.spinner.Writer = c.options.stdout
+	c.spinner.Start()
 
 	redisConn, err := redis.New()
 	if err != nil {

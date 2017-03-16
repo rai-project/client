@@ -34,6 +34,7 @@ import:
 - package: github.com/rai-project/uuid
 - package: github.com/rai-project/vipertags
 - package: github.com/spf13/viper
+- package: github.com/briandowns/spinner
 testImport:
 - package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify
