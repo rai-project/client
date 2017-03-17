@@ -6,6 +6,9 @@ resources:
 commands:
   build:
     - echo "Building project"
-    - /bin/sh -c ls /usr/local/bin
-    - /usr/local/bin/gcc /src/main.c
+    - /bin/sh -c set
+    - /bin/sh -c echo $PATH
+    - ls -l /usr/local/bin
+    - ls -l /usr
+    - /bin/sh -c /usr/local/bin/gcc /src/main.c
     - ./a.out
