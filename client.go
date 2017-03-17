@@ -197,7 +197,8 @@ func (c *client) Upload() error {
 
 	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Preparing your project directory for upload."))
 
-	zippedReader, err := archive.Zip(c.options.directory)
+	dir, err := archive.CanonicalTarNameForPath(c.options.directory)
+	zippedReader, err := archive.Zip(dir)
 	if err != nil {
 		return err
 	}
