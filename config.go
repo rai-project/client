@@ -7,20 +7,24 @@ import (
 )
 
 type clientConfig struct {
-	UploadBucketName           string `json:"upload_bucket" config:"client.upload_bucket" default:"files.rai-project.com"`
-	UploadDestinationDirectory string `json:"upload_destination_directory" config:"client.upload_destination_directory" default:"userdata"`
-	BuildFileBaseName          string `json:"build_file" config:"client.build_file" default:"default"`
+	UploadBucketName           string        `json:"upload_bucket" config:"client.upload_bucket" default:"files.rai-project.com"`
+	UploadDestinationDirectory string        `json:"upload_destination_directory" config:"client.upload_destination_directory" default:"userdata"`
+	BuildFileBaseName          string        `json:"build_file" config:"client.build_file" default:"default"`
+	done                       chan struct{} `json:"-" config:"-"`
 }
 
 var (
-	Config = &clientConfig{}
+	Config = &clientConfig{
+		done: make(chan struct{}),
+	}
 )
 
 func (clientConfig) ConfigName() string {
 	return "Client"
 }
 
-func (clientConfig) SetDefaults() {
+func (a *clientConfig) SetDefaults() {
+	vipertags.SetDefaults(a)
 }
 
 func (a *clientConfig) Read() {
@@ -28,6 +32,10 @@ func (a *clientConfig) Read() {
 	if a.BuildFileBaseName == "" || a.BuildFileBaseName == "default" {
 		a.BuildFileBaseName = config.App.Name + "_build"
 	}
+}
+
+func (c clientConfig) Wait() {
+	<-c.done
 }
 
 func (c clientConfig) String() string {
