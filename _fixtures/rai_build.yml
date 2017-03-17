@@ -1,14 +1,10 @@
 rai:
   version: 0.2 # this is required
-  image: gcc
+  image: gcc:6.3.0
 resources:
   # gpus: 1 # currently required to be 1
 commands:
   build:
     - echo "Building project"
-    - /bin/sh -c set
-    - /bin/sh -c echo $PATH
-    - ls -l /usr/local/bin
-    - ls -l /usr
-    - /bin/sh -c /usr/local/bin/gcc /src/main.c
+    - gcc /src/main.c
     - ./a.out
