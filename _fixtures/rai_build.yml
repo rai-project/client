@@ -6,7 +6,6 @@ resources:
 commands:
   build:
     - echo "Building project"
-    - which gcc
-    - ls /usr/bin
-    - /usr/bin/gcc /src/main.c
+    - /bin/sh -c ls /usr/local/bin
+    - /usr/local/bin/gcc /src/main.c
     - ./a.out
