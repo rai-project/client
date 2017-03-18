@@ -28,6 +28,7 @@ func (a *clientConfig) SetDefaults() {
 }
 
 func (a *clientConfig) Read() {
+	defer close(a.done)
 	vipertags.Fill(a)
 	if a.BuildFileBaseName == "" || a.BuildFileBaseName == "default" {
 		a.BuildFileBaseName = config.App.Name + "_build"
