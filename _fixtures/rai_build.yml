@@ -1,8 +1,13 @@
 rai:
   version: 0.2 # this is required
-  image: gcc:6.3.0
+  #  image: gcc:6.3.0
+  image: ppc64le/gcc
 resources:
-  # gpus: 1 # currently required to be 1
+  cpu:
+    architecture: ppc64le
+  network: false
+  # gpu:
+  #   count: 1
 commands:
   build:
     - echo "Building project"
