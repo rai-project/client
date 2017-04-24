@@ -6,8 +6,8 @@ resources:
   network: false
 commands:
   build_image:
-    image_name: "webgpu/cudnn:8.0"
-    dockerfile: "./dockerfile"
+    image_name: webgpu/cudnn:8.0
+    dockerfile: "./Dockerfile"
   build:
     - echo "Building project"
     - gcc /src/main.c
