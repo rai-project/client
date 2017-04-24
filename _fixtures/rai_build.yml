@@ -1,14 +1,13 @@
 rai:
   version: 0.2 # this is required
-  #  image: gcc:6.3.0
-  image: ppc64le/gcc
 resources:
   cpu:
     architecture: ppc64le
   network: false
-  # gpu:
-  #   count: 1
 commands:
+  build_image:
+    image_name: "webgpu/cudnn:8.0"
+    dockerfile: "./dockerfile"
   build:
     - echo "Building project"
     - gcc /src/main.c
