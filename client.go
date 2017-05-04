@@ -209,7 +209,7 @@ func (c *client) Upload() error {
 
 	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
-	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + ".tar." + archive.Extension()
+	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + "." + archive.Extension()
 
 	key, err := st.UploadFrom(
 		zippedReader,
