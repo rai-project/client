@@ -5,9 +5,10 @@ import:
 - package: github.com/Unknwon/com
   version: ~1.0.0
 - package: github.com/aws/aws-sdk-go
-  version: ~1.8.8
+  version: ~1.8.19
   subpackages:
   - aws/session
+- package: github.com/briandowns/spinner
 - package: github.com/fatih/color
   version: ~1.4.1
 - package: github.com/k0kubun/pp
@@ -17,12 +18,19 @@ import:
 - package: github.com/pkg/errors
   version: ~0.8.0
 - package: github.com/rai-project/archive
+- package: github.com/rai-project/auth
+  subpackages:
+  - provider
 - package: github.com/rai-project/aws
 - package: github.com/rai-project/broker
   subpackages:
   - sqs
 - package: github.com/rai-project/config
 - package: github.com/rai-project/logger
+- package: github.com/rai-project/model
+- package: github.com/rai-project/pubsub
+  subpackages:
+  - redis
 - package: github.com/rai-project/ratelimit
 - package: github.com/rai-project/serializer
   subpackages:
@@ -30,11 +38,9 @@ import:
 - package: github.com/rai-project/store
   subpackages:
   - s3
-- package: github.com/rai-project/user
 - package: github.com/rai-project/uuid
 - package: github.com/rai-project/vipertags
-- package: github.com/spf13/viper
-- package: github.com/briandowns/spinner
+- package: gopkg.in/yaml.v2
 testImport:
 - package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify
