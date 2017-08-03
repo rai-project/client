@@ -1,14 +1,13 @@
 package: github.com/rai-project/client
 import:
-- package: github.com/sirupsen/logrus
-  version: ^1.0.0
 - package: github.com/Unknwon/com
-  version: ^1.0.0
+  version: ~1.0.0
 - package: github.com/aws/aws-sdk-go
-  version: ~1.10.18
+  version: ~1.10.20
   subpackages:
   - aws/session
 - package: github.com/briandowns/spinner
+  version: ~1.0.0
 - package: github.com/fatih/color
   version: master
 - package: github.com/k0kubun/pp
@@ -40,9 +39,12 @@ import:
   - s3
 - package: github.com/rai-project/uuid
 - package: github.com/rai-project/vipertags
+- package: github.com/sirupsen/logrus
+  version: ~1.0.2
 - package: gopkg.in/yaml.v2
 testImport:
 - package: github.com/GeertJohan/go-sourcepath
 - package: github.com/stretchr/testify
+  version: ~1.1.4
   subpackages:
   - assert
