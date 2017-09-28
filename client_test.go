@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestClient ...
 func TestClient(t *testing.T) {
 	clt, err := New(
 		Directory(filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures")),
@@ -45,6 +46,7 @@ func TestClient(t *testing.T) {
 	defer clt.Disconnect()
 }
 
+// TestMain ...
 func TestMain(m *testing.M) {
 	config.Init(
 		config.VerboseMode(true),

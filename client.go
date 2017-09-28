@@ -56,14 +56,17 @@ type nopWriterCloser struct {
 	io.Writer
 }
 
+// Close ...
 func (nopWriterCloser) Close() error { return nil }
 
+// DefaultUploadExpiration ...
 var (
 	DefaultUploadExpiration = func() time.Time {
 		return time.Now().AddDate(0, 0, 1) // tomorrow
 	}
 )
 
+// New ...
 func New(opts ...Option) (*client, error) {
 	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
 	if !config.App.Color {
@@ -127,6 +130,7 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
+// Validate ...
 func (c *client) Validate() error {
 	options := c.options
 
@@ -209,6 +213,7 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 	return nil
 }
 
+// Upload ...
 func (c *client) Upload() error {
 	if c.awsSession == nil {
 		log.Fatal("Expecting the awsSession to be set. Call Init before calling Upload")
@@ -262,6 +267,7 @@ func (c *client) Upload() error {
 	return nil
 }
 
+// Publish ...
 func (c *client) Publish() error {
 
 	profile := c.profile.Info()
@@ -318,6 +324,7 @@ func (c *client) Publish() error {
 	return nil
 }
 
+// Subscribe ...
 func (c *client) Subscribe() error {
 	redisConn, err := redis.New()
 	if err != nil {
@@ -338,6 +345,7 @@ func (c *client) Subscribe() error {
 	return nil
 }
 
+// Connect ...
 func (c *client) Connect() error {
 	if err := c.broker.Connect(); err != nil {
 		return err
@@ -346,6 +354,7 @@ func (c *client) Connect() error {
 	return nil
 }
 
+// Disconnect ...
 func (c *client) Disconnect() error {
 	if !c.isConnected {
 		return nil
@@ -362,6 +371,7 @@ func (c *client) Disconnect() error {
 	return c.broker.Disconnect()
 }
 
+// Wait ...
 func (c *client) Wait() error {
 	<-c.done
 	return nil

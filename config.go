@@ -13,20 +13,24 @@ type clientConfig struct {
 	done                       chan struct{} `json:"-" config:"-"`
 }
 
+// Config ...
 var (
 	Config = &clientConfig{
 		done: make(chan struct{}),
 	}
 )
 
+// ConfigName ...
 func (clientConfig) ConfigName() string {
 	return "Client"
 }
 
+// SetDefaults ...
 func (a *clientConfig) SetDefaults() {
 	vipertags.SetDefaults(a)
 }
 
+// Read ...
 func (a *clientConfig) Read() {
 	defer close(a.done)
 	vipertags.Fill(a)
@@ -35,14 +39,17 @@ func (a *clientConfig) Read() {
 	}
 }
 
+// Wait ...
 func (c clientConfig) Wait() {
 	<-c.done
 }
 
+// String ...
 func (c clientConfig) String() string {
 	return pp.Sprintln(c)
 }
 
+// Debug ...
 func (c clientConfig) Debug() {
 	log.Debug("Client Config = ", c)
 }
