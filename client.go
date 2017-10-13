@@ -134,6 +134,12 @@ func (c *client) fixDockerPushCredentials() (err error) {
 func (c *client) Validate() error {
 	options := c.options
 
+	if options.isSubmission {
+		for filepath := range Config.SubmitRequirements {
+			return errors.Errorf("Didn't find a required file [%v]", filepath)
+		}
+	}
+
 	// Authenticate user
 	if err := c.authenticate(options.profilePath); err != nil {
 		return err
