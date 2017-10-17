@@ -11,7 +11,7 @@ import (
 )
 
 // TestClient ...
-func TestClient(t *testing.T) {
+func DISABLED_TestClient(t *testing.T) {
 	clt, err := New(
 		Directory(filepath.Join(sourcepath.MustAbsoluteDir(), "_fixtures")),
 		BuildFileBaseName("rai_build"),
@@ -31,7 +31,11 @@ func TestClient(t *testing.T) {
 	}
 	assert.NotEmpty(t, clt.uploadKey, "upload key must be set after upload")
 
-	err = clt.PublishSubscribe()
+	err = clt.Publish()
+	if !assert.NoError(t, err) {
+		return
+	}
+	err = clt.Subscribe()
 	if !assert.NoError(t, err) {
 		return
 	}
