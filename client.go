@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/k0kubun/pp"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
@@ -135,8 +136,12 @@ func (c *client) Validate() error {
 	options := c.options
 
 	if options.isSubmission {
-		for filepath := range Config.SubmitRequirements {
-			return errors.Errorf("Didn't find a required file [%v]", filepath)
+		pp.Println(Config.SubmitRequirements)
+		for _, requiredFileName := range Config.SubmitRequirements {
+			requiredFilePath := filepath.Join(options.directory, requiredFileName)
+			if !com.IsFile(requiredFilePath) {
+				return errors.Errorf("Didn't find a required file: [%v]", requiredFilePath)
+			}
 		}
 	}
 

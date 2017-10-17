@@ -10,7 +10,7 @@ type clientConfig struct {
 	UploadBucketName           string        `json:"upload_bucket" config:"client.upload_bucket" default:"files.rai-project.com"`
 	UploadDestinationDirectory string        `json:"upload_destination_directory" config:"client.upload_destination_directory" default:"userdata"`
 	BuildFileBaseName          string        `json:"build_file" config:"client.build_file" default:"default"`
-	SubmitRequirements         []string      `json:"submit_requirements" config:"client.submit_requirements" default:"[]"`
+	SubmitRequirements         []string      `json:"submit_requirements" config:"client.submit_requirements"`
 	done                       chan struct{} `json:"-" config:"-"`
 }
 
