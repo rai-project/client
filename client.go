@@ -11,6 +11,8 @@ import (
 
 	"fmt"
 
+	"gopkg.in/mgo.v2"
+
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
@@ -130,9 +132,40 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
+func (c *client) recordSubmission() error {
+
+	mongoEndpoint := Config.MongoEndpoint
+
+	session, err := mgo.Dial(mongoEndpoint)
+	log.Debug("Dialing mongo @ ", mongoEndpoint)
+	if err != nil {
+		return errors.Errorf("couldn't dial mongodb @ %v", mongoEndpoint)
+	}
+	defer session.Close()
+
+	// Any thread accessing this entry will see it or a later one
+	session.SetMode(mgo.Monotonic, true)
+
+	collection := session.DB("testdb").C("testc")
+	err = collection.Insert(&SubmitRecord{"teamname", time.Now()})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Validate ...
 func (c *client) Validate() error {
 	options := c.options
+
+	// store some stuff in MongoDB
+	if options.isSubmission {
+		err := c.recordSubmission()
+		if err != nil {
+			return err
+		}
+	}
 
 	// Authenticate user
 	if err := c.authenticate(options.profilePath); err != nil {
