@@ -82,7 +82,7 @@ func New(opts ...Option) (*client, error) {
 		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
 		stderr:            nopWriterCloser{err},
-		jobQueueName:      config.App.Name,
+		jobQueueName:      Config.JobQueueName,
 	}
 
 	for _, o := range opts {
