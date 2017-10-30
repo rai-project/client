@@ -297,7 +297,7 @@ func (c *client) Publish() error {
 	}
 	c.broker = brkr
 	err = brkr.Publish(
-		config.App.Name,
+		c.options.jobQueueName,
 		&broker.Message{
 			ID: c.ID,
 			Header: map[string]string{
