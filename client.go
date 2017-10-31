@@ -1,5 +1,7 @@
 package client
 
+//go:generate esc -o fixtures.go -pkg client _fixtures/rai_submission.yml
+
 import (
 	"io"
 	"io/ioutil"
@@ -56,6 +58,11 @@ type client struct {
 	spinner     *spinner.Spinner
 	done        chan bool
 }
+
+var (
+	submissionName  = "_fixtures/rai_submission.yml"
+	submissionBuild = FSMustByte(false, "/"+submissionName)
+)
 
 type nopWriterCloser struct {
 	io.Writer
@@ -174,18 +181,24 @@ func (c *client) Validate() error {
 		return err
 	}
 
-	buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
-	if !com.IsFile(buildFilePath) {
-		return errors.Errorf("the build file [%v] does not exist", buildFilePath)
-	}
-
-	buf, err := ioutil.ReadFile(buildFilePath)
-	if err != nil {
-		return errors.Wrapf(err, "unable to read %v", buildFilePath)
+	var buf []byte
+	if options.isSubmission {
+		buf = submissionBuild
+		fmt.Fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
+	} else {
+		buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
+		if !com.IsFile(buildFilePath) {
+			return errors.Errorf("the build file [%v] does not exist", buildFilePath)
+		}
+		var err error
+		buf, err = ioutil.ReadFile(buildFilePath)
+		if err != nil {
+			return errors.Wrapf(err, "unable to read %v", buildFilePath)
+		}
 	}
 
 	if err := yaml.Unmarshal(buf, &c.buildSpec); err != nil {
-		return errors.Wrapf(err, "unable to parse %v", buildFilePath)
+		return errors.Wrapf(err, "unable to parse build file")
 	}
 
 	if options.isSubmission {
