@@ -11,7 +11,7 @@ import (
 
 	"fmt"
 
-	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -26,6 +26,8 @@ import (
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
+	"github.com/rai-project/database"
+	"github.com/rai-project/database/mongodb"
 	"github.com/rai-project/model"
 	"github.com/rai-project/pubsub"
 	"github.com/rai-project/pubsub/redis"
@@ -42,6 +44,7 @@ type client struct {
 	ID          string
 	uploadKey   string
 	awsSession  *session.Session
+	mongodb     database.Database
 	options     Options
 	broker      broker.Broker
 	pubsubConn  pubsub.Connection
@@ -132,40 +135,39 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
-func (c *client) recordSubmission() error {
+func (c *client) RecordIfSubmission() error {
 
-	mongoEndpoint := Config.MongoEndpoint
-
-	session, err := mgo.Dial(mongoEndpoint)
-	log.Debug("Dialing mongo @ ", mongoEndpoint)
-	if err != nil {
-		return errors.Errorf("couldn't dial mongodb @ %v", mongoEndpoint)
+	if !c.options.isSubmission {
+		return nil
 	}
-	defer session.Close()
 
-	// Any thread accessing this entry will see it or a later one
-	session.SetMode(mgo.Monotonic, true)
+	db, err := mongodb.NewDatabase(config.App.Name)
+	if err != nil {
+		return err
+	}
+	log.Info("Connected to submission database")
+	defer db.Close()
 
-	collection := session.DB("testdb").C("testc")
-	err = collection.Insert(&SubmitRecord{"teamname", time.Now()})
+	tbl, err := mongodb.NewTable(db, "ranking")
 	if err != nil {
 		return err
 	}
 
-	return nil
+	// tbl.Create(nil)
+	ranking := model.Ranking{
+		ID:        bson.NewObjectId(),
+		CreatedAt: time.Now(),
+	}
+
+	err = tbl.Insert(ranking)
+	log.Info("Inserted ranking ranking")
+
+	return err
 }
 
 // Validate ...
 func (c *client) Validate() error {
 	options := c.options
-
-	// store some stuff in MongoDB
-	if options.isSubmission {
-		err := c.recordSubmission()
-		if err != nil {
-			return err
-		}
-	}
 
 	// Authenticate user
 	if err := c.authenticate(options.profilePath); err != nil {
@@ -216,6 +218,16 @@ func (c *client) Validate() error {
 		return err
 	}
 	c.awsSession = session
+
+	// Fail early on no connection to submission database
+	if options.isSubmission {
+		db, err := mongodb.NewDatabase(config.App.Name)
+		if err != nil {
+			log.WithError(err).Error("Unable to contact submission database")
+			return err
+		}
+		defer db.Close()
+	}
 
 	return nil
 }

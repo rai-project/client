@@ -11,7 +11,6 @@ type clientConfig struct {
 	UploadDestinationDirectory string        `json:"upload_destination_directory" config:"client.upload_destination_directory" default:"userdata"`
 	BuildFileBaseName          string        `json:"build_file" config:"client.build_file" default:"default"`
 	SubmitRequirements         []string      `json:"submit_requirements" config:"client.submit_requirements"`
-	MongoEndpoint              string        `json:"mongo_endpoint" config:"client.mongo_endpoint" default:"localhost"`
 	done                       chan struct{} `json:"-" config:"-"`
 }
 
