@@ -288,7 +288,6 @@ func (c *client) Publish() error {
 	}
 
 	brkr, err := sqs.New(
-		sqs.QueueName(c.options.jobQueueName),
 		broker.Serializer(c.serializer),
 		sqs.Session(c.awsSession),
 	)
@@ -296,6 +295,7 @@ func (c *client) Publish() error {
 		return err
 	}
 	c.broker = brkr
+	log.Debug("Submitting to queue=", c.options.jobQueueName)
 	err = brkr.Publish(
 		c.options.jobQueueName,
 		&broker.Message{
