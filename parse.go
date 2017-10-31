@@ -16,11 +16,7 @@ var (
 	projectURLRe    = regexp.MustCompile(`✱ The build folder has been uploaded to (\s*\[+?\s*(\!?)\s*([a-z]*)\s*\|?\s*([a-z0-9\.\-_]*)\s*\]+?)?\s*([^\s]+)\s*\..*`)
 )
 
-type ranking struct {
-	OpFullRuntime time.Duration
-}
-
-func parseProgramOutputLine(ranking *model.Ranking, s string) {
+func parseProgramOutputLine(ranking *model.Fa2017Ece408Ranking, s string) {
 	// if !programOutputRe.MatchString(s) {
 	// 	return
 	// }
@@ -45,7 +41,7 @@ func parseProgramOutputLine(ranking *model.Ranking, s string) {
 	return
 }
 
-func parseTimeResult(ranking *model.Ranking, s string) {
+func parseTimeResult(ranking *model.Fa2017Ece408Ranking, s string) {
 	if !timeResultRe.MatchString(s) {
 		return
 	}
@@ -57,11 +53,11 @@ func parseTimeResult(ranking *model.Ranking, s string) {
 	}
 	op, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.OpFullRuntime = op
+		ranking.OpRuntime = op
 	}
 }
 
-func parseProjectURL(ranking *model.Ranking, s string) {
+func parseProjectURL(ranking *model.Fa2017Ece408Ranking, s string) {
 	if !projectURLRe.MatchString(s) {
 		return
 	}
@@ -73,7 +69,6 @@ func parseProjectURL(ranking *model.Ranking, s string) {
 	}
 	u, err := url.Parse(matches[len(matches)-1])
 	if err == nil {
-		ranking.S3Key = u.String()
 		ranking.ProjectURL = u.String()
 	}
 	return
@@ -84,7 +79,7 @@ func removeColor(s string) string {
 	return colorRe.ReplaceAllString(s, "")
 }
 
-func parseLine(ranking *model.Ranking, s string) {
+func parseLine(ranking *model.Fa2017Ece408Ranking, s string) {
 	s = removeColor(s)
 	parseProgramOutputLine(ranking, s)
 	parseTimeResult(ranking, s)
