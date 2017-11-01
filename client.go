@@ -37,19 +37,22 @@ import (
 )
 
 type client struct {
-	ID          string
-	uploadKey   string
-	awsSession  *session.Session
-	options     Options
-	broker      broker.Broker
-	pubsubConn  pubsub.Connection
-	profile     auth.Profile
-	isConnected bool
-	serializer  serializer.Serializer
-	subscribers []pubsub.Subscriber
-	buildSpec   model.BuildSpecification
-	spinner     *spinner.Spinner
-	done        chan bool
+	ID                    string
+	uploadKey             string
+	awsSession            *session.Session
+	options               Options
+	broker                broker.Broker
+	pubsubConn            pubsub.Connection
+	profile               auth.Profile
+	isConnected           bool
+	serializer            serializer.Serializer
+	subscribers           []pubsub.Subscriber
+	buildSpec             model.BuildSpecification
+	spinner               *spinner.Spinner
+	configJobQueueName    string
+	optionsJobQueueName   string
+	buildFileJobQueueName string
+	done                  chan bool
 }
 
 type nopWriterCloser struct {
@@ -65,6 +68,16 @@ var (
 		return time.Now().AddDate(0, 0, 1) // tomorrow
 	}
 )
+
+// JobQueueName returns the job queue name from option, build file, or config in that order
+func (c *client) JobQueueName() string {
+	if c.optionsJobQueueName != "" {
+		return c.optionsJobQueueName
+	} else if c.buildFileJobQueueName != "" {
+		return c.buildFileJobQueueName
+	}
+	return c.configJobQueueName
+}
 
 // New ...
 func New(opts ...Option) (*client, error) {
@@ -82,7 +95,6 @@ func New(opts ...Option) (*client, error) {
 		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
 		stderr:            nopWriterCloser{err},
-		jobQueueName:      Config.JobQueueName,
 	}
 
 	for _, o := range opts {
@@ -98,11 +110,13 @@ func New(opts ...Option) (*client, error) {
 	}
 
 	return &client{
-		ID:          uuid.NewV4(),
-		isConnected: false,
-		options:     options,
-		serializer:  json.New(),
-		done:        make(chan bool),
+		ID:                  uuid.NewV4(),
+		isConnected:         false,
+		options:             options,
+		serializer:          json.New(),
+		configJobQueueName:  Config.JobQueueName,
+		optionsJobQueueName: options.jobQueueName,
+		done:                make(chan bool),
 	}, nil
 }
 
@@ -152,6 +166,9 @@ func (c *client) Validate() error {
 	if err := yaml.Unmarshal(buf, &c.buildSpec); err != nil {
 		return errors.Wrapf(err, "unable to parse %v", buildFilePath)
 	}
+	// set the queue from the build file
+	c.buildFileJobQueueName = "rai_" + c.buildSpec.Resources.CPU.Architecture + "_test"
+	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overrriden by client.Options")
 
 	if !config.IsDebug {
 		if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
@@ -288,6 +305,7 @@ func (c *client) Publish() error {
 	}
 
 	brkr, err := sqs.New(
+		sqs.QueueName(c.JobQueueName()),
 		broker.Serializer(c.serializer),
 		sqs.Session(c.awsSession),
 	)
@@ -295,9 +313,9 @@ func (c *client) Publish() error {
 		return err
 	}
 	c.broker = brkr
-	log.Debug("Submitting to queue=", c.options.jobQueueName)
+	log.Debug("Submitting to queue=", c.JobQueueName())
 	err = brkr.Publish(
-		c.options.jobQueueName,
+		c.JobQueueName(),
 		&broker.Message{
 			ID: c.ID,
 			Header: map[string]string{
