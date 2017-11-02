@@ -14,4 +14,4 @@ commands:
   build:
     - echo "Building project"
     - /src/build.sh
-    - python /src/final.py
+    - /usr/bin/time python /src/final.py
