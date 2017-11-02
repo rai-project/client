@@ -14,4 +14,4 @@ commands:
   build:
     - echo "Building project"
     - /src/build.sh
-    - /usr/bin/time python /src/final.py
+    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /src/final.py

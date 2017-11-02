@@ -13,8 +13,6 @@ import (
 
 	"fmt"
 
-	"gopkg.in/mgo.v2/bson"
-
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
@@ -39,24 +37,29 @@ import (
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
+	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/yaml.v2"
 )
 
 type client struct {
-	ID          string
-	uploadKey   string
-	awsSession  *session.Session
-	mongodb     database.Database
-	options     Options
-	broker      broker.Broker
-	pubsubConn  pubsub.Connection
-	profile     auth.Profile
-	isConnected bool
-	serializer  serializer.Serializer
-	subscribers []pubsub.Subscriber
-	buildSpec   model.BuildSpecification
-	spinner     *spinner.Spinner
-	done        chan bool
+	ID                    string
+	uploadKey             string
+	awsSession            *session.Session
+	mongodb               database.Database
+	options               Options
+	broker                broker.Broker
+	pubsubConn            pubsub.Connection
+	profile               auth.Profile
+	isConnected           bool
+	serializer            serializer.Serializer
+	subscribers           []pubsub.Subscriber
+	buildSpec             model.BuildSpecification
+	spinner               *spinner.Spinner
+	configJobQueueName    string
+	optionsJobQueueName   string
+	buildFileJobQueueName string
+	ranking               *model.Fa2017Ece408Ranking
+	done                  chan bool
 }
 
 var (
@@ -78,6 +81,16 @@ var (
 	}
 )
 
+// JobQueueName returns the job queue name from option, build file, or config in that order
+func (c *client) JobQueueName() string {
+	if c.optionsJobQueueName != "" {
+		return c.optionsJobQueueName
+	} else if c.buildFileJobQueueName != "" {
+		return c.buildFileJobQueueName
+	}
+	return c.configJobQueueName
+}
+
 // New ...
 func New(opts ...Option) (*client, error) {
 	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
@@ -94,7 +107,6 @@ func New(opts ...Option) (*client, error) {
 		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
 		stderr:            nopWriterCloser{err},
-		jobQueueName:      config.App.Name,
 	}
 
 	for _, o := range opts {
@@ -110,11 +122,13 @@ func New(opts ...Option) (*client, error) {
 	}
 
 	return &client{
-		ID:          uuid.NewV4(),
-		isConnected: false,
-		options:     options,
-		serializer:  json.New(),
-		done:        make(chan bool),
+		ID:                  uuid.NewV4(),
+		isConnected:         false,
+		options:             options,
+		serializer:          json.New(),
+		configJobQueueName:  Config.JobQueueName,
+		optionsJobQueueName: options.jobQueueName,
+		done:                make(chan bool),
 	}, nil
 }
 
@@ -160,13 +174,10 @@ func (c *client) RecordIfSubmission() error {
 		return err
 	}
 
-	// tbl.Create(nil)
-	ranking := model.Ranking{
-		ID:        bson.NewObjectId(),
-		CreatedAt: time.Now(),
+	if c.ranking == nil {
+		log.Error("submission ranking was not filled")
 	}
-
-	err = tbl.Insert(ranking)
+	err = tbl.Insert(c.ranking)
 	log.Info("Inserted ranking ranking")
 
 	return err
@@ -209,6 +220,9 @@ func (c *client) Validate() error {
 			}
 		}
 	}
+	// set the queue from the build file
+	c.buildFileJobQueueName = "rai_" + c.buildSpec.Resources.CPU.Architecture + "_test"
+	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overrriden by client.Options")
 
 	if !config.IsDebug {
 		if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
@@ -246,6 +260,15 @@ func (c *client) Validate() error {
 }
 
 func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
+
+	parse := func(w io.WriteCloser, resp model.JobResponse) {
+		if c.ranking == nil {
+			c.ranking = &model.Fa2017Ece408Ranking{}
+			c.ranking.ID = bson.NewObjectId()
+		}
+		parseLine(c.ranking, strings.TrimSpace(string(resp.Body)))
+	}
+
 	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {
 		body := strings.TrimSpace(string(resp.Body))
 		if body == "" {
@@ -270,8 +293,10 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 				continue
 			}
 			if data.Kind == model.StderrResponse {
+				parse(c.options.stderr, data)
 				formatPrint(c.options.stderr, data)
 			} else if data.Kind == model.StdoutResponse {
+				parse(c.options.stderr, data)
 				formatPrint(c.options.stderr, data)
 			}
 		}
@@ -355,7 +380,7 @@ func (c *client) Publish() error {
 	}
 
 	brkr, err := sqs.New(
-		sqs.QueueName(c.options.jobQueueName),
+		sqs.QueueName(c.JobQueueName()),
 		broker.Serializer(c.serializer),
 		sqs.Session(c.awsSession),
 	)
@@ -363,8 +388,9 @@ func (c *client) Publish() error {
 		return err
 	}
 	c.broker = brkr
+	log.Debug("Submitting to queue=", c.JobQueueName())
 	err = brkr.Publish(
-		config.App.Name,
+		c.JobQueueName(),
 		&broker.Message{
 			ID: c.ID,
 			Header: map[string]string{

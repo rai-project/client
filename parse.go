@@ -3,6 +3,7 @@ package client
 import (
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,33 +12,31 @@ import (
 
 var (
 	colorRe         = regexp.MustCompile(`\[(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]`)
-	timeResultRe    = regexp.MustCompile(`Time:\s*([-+]?[0-9]*\.?[0-9]+)`)
-	programOutputRe = regexp.MustCompile(`Done with ([-+]?[0-9]*\.?[0-9]+)\s.*elapsed = ([-+]?[0-9]*\.?[0-9]+)\smilliseconds.\sCorrectness:\s([-+]?[0-9]*\.?[0-9]+)`)
+	timeResultRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
+	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Batch Size: ([-+]?[0-9]*\.?[0-9]+) Model: (.*)`)
 	projectURLRe    = regexp.MustCompile(`✱ The build folder has been uploaded to (\s*\[+?\s*(\!?)\s*([a-z]*)\s*\|?\s*([a-z0-9\.\-_]*)\s*\]+?)?\s*([^\s]+)\s*\..*`)
 )
 
-func parseProgramOutputLine(ranking *model.Fa2017Ece408Ranking, s string) {
-	// if !programOutputRe.MatchString(s) {
-	// 	return
-	// }
-	// matches := programOutputRe.FindAllStringSubmatch(s, 1)[0]
-	// if len(matches) < 4 {
-	// 	log.WithField("match_count", len(matches)).
-	// 		Debug("Unexpected number of matches while parsing program output")
-	// 	return
-	// }
-	// batchSize, err := strconv.Atoi(matches[1])
-	// if err == nil {
-	// 	ranking.BatchSize = batchSize
-	// }
-	// elapsedTime, err := time.ParseDuration(matches[2] + "ms")
-	// if err == nil {
-	// 	ranking.Runtime = elapsedTime
-	// }
-	// correctness, err := strconv.ParseFloat(matches[3], 64)
-	// if err == nil {
-	// 	ranking.Correctness = correctness
-	// }
+func parseProgramOutput(ranking *model.Fa2017Ece408Ranking, s string) {
+	if !programOutputRe.MatchString(s) {
+		return
+	}
+	matches := programOutputRe.FindAllStringSubmatch(s, 1)[0]
+	if len(matches) < 4 {
+		log.WithField("match_count", len(matches)).
+			Debug("Unexpected number of matches while parsing program output")
+		return
+	}
+	correctness, err := strconv.ParseFloat(matches[1], 64)
+	if err == nil {
+		ranking.Correctness = correctness
+	}
+	batchSize, err := strconv.Atoi(matches[2])
+	if err == nil {
+		ranking.BatchSize = batchSize
+	}
+	ranking.Model = matches[3]
+
 	return
 }
 
@@ -46,14 +45,22 @@ func parseTimeResult(ranking *model.Fa2017Ece408Ranking, s string) {
 		return
 	}
 	matches := timeResultRe.FindAllStringSubmatch(s, 1)[0]
-	if len(matches) < 1 {
+	if len(matches) < 4 {
 		log.WithField("match_count", len(matches)).
 			Debug("Unexpected number of matches while parsing time result")
 		return
 	}
-	op, err := time.ParseDuration(matches[1] + "s")
+	user, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.OpRuntime = op
+		ranking.UserFullRuntime = user
+	}
+	system, err := time.ParseDuration(matches[2] + "s")
+	if err == nil {
+		ranking.SystemFullRuntime = system
+	}
+	elapsed, err := time.ParseDuration(matches[3] + "s")
+	if err == nil {
+		ranking.ElapsedFullRuntime = elapsed
 	}
 }
 
@@ -81,7 +88,7 @@ func removeColor(s string) string {
 
 func parseLine(ranking *model.Fa2017Ece408Ranking, s string) {
 	s = removeColor(s)
-	parseProgramOutputLine(ranking, s)
+	parseProgramOutput(ranking, s)
 	parseTimeResult(ranking, s)
 	parseProjectURL(ranking, s)
 }
