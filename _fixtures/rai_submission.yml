@@ -2,10 +2,10 @@
 
 rai:
   version: 0.2
-  image: cwpearson/2017fa_ece408_mxnet_docker:ppc64le-gpu-latest
+  image: cwpearson/2017fa_ece408_mxnet_docker:x86_64-gpu-latest
 resources:
   cpu:
-    architecture: ppc64le
+    architecture: amd64
   gpu:
     architecture: pascal
     count: 1
