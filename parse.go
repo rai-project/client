@@ -53,7 +53,7 @@ func parseProgramTime(ranking *model.Fa2017Ece408Ranking, s string) {
 	}
 	elapsed, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.OpRuntime = elapsed
+		ranking.OpRuntime += elapsed
 	}
 
 	return
