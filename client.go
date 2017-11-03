@@ -169,7 +169,7 @@ func (c *client) RecordIfSubmission() error {
 	log.Info("Connected to submission database")
 	defer db.Close()
 
-	tbl, err := mongodb.NewTable(db, "ranking")
+	tbl, err := mongodb.NewTable(db, "rankings")
 	if err != nil {
 		return err
 	}
