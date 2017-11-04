@@ -221,7 +221,7 @@ func (c *client) Validate() error {
 		}
 	}
 	// set the queue from the build file
-	c.buildFileJobQueueName = config.App.Name + "_" + c.buildSpec.Resources.CPU.Architecture + "_test"
+	c.buildFileJobQueueName = config.App.Name + "_" + c.buildSpec.Resources.CPU.Architecture
 	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overrriden by client.Options")
 
 	if !config.IsDebug {
