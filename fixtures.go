@@ -192,14 +192,14 @@ var _escData = map[string]*_escFile{
 
 	"/_fixtures/rai_submission.yml": {
 		local:   "_fixtures/rai_submission.yml",
-		size:    370,
-		modtime: 1509742535,
+		size:    369,
+		modtime: 1509825031,
 		compressed: `
-H4sIAAAAAAAC/2yPTY7iMBBG9z7Fp4xYhgQUMcjLuQKadWScSuLGf6qyG7h9K9C965Wl7z09q/7gUq/B
-ibgUMTtPmBODLGHoz5iN9zj2h79KsXFaAZ/Em6rR748KcMEspGHvmQxLit0mz2YkS0N/HsMjUhmnZG/E
-+nE+jaehXXJtvSkkRTFJqmxJtrLNdXsAw3Z1hWypTBomTKdBAcvvOBuxxr+ATTUWjYMCIpV74pveDhBS
-NoVg4vT65lqdn96lFmTXhObfNrm4IHP6IFuab9oJ2+7l72X92apwd3WxKy4Q2hnN7n8VYuwu8pRCATsi
-b7LQ1CA/y5riuzO7aPw+P9VXAAAA///2dWBqcgEAAA==
+H4sIAAAAAAAC/2yOzW7qQAyF9/MUR7liGRIQuhdleV8BdY0Gx0mmzJ/smVLevkpod11ZOufzZ//Bpd6C
+U3UpYnKeMSUBE+PUnzFZ73HsD/+MEesGA3ywrOiAfn80gAt25gH0yGxFU+xWeLJXJj7152v4jFyuY6I7
+y2DD+PfUzrm23hbWYoQ1VSHWVUy5rgOwQosrTKUKD9iWDDD/XmerZP1WUKqxDDgYIHJ5JLkP6//KhlII
+No7bmVt1fnyZWjAtCc3/NXJxRpb0zlSa77ZToW7j97r8ZFWlu7nYFRcY7YRm91aVBbuLPrVwwI7Z26w8
+NsjPsqT48kwuWr/PT/MVAAD//2W+a9lxAQAA
 `,
 	},
 
