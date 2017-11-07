@@ -13,8 +13,8 @@ import (
 var (
 	colorRe         = regexp.MustCompile(`\[(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]`)
 	timeResultRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
-	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Batch Size: ([-+]?[0-9]*\.?[0-9]+) Model: (.*)`)
-	programTimeRe   = regexp.MustCompile(`Time: ([-+]?[0-9]*\.?[0-9]+)`)
+	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Model: (.*)`)
+	programTimeRe   = regexp.MustCompile(`Op Time: ([-+]?[0-9]*\.?[0-9]+)`)
 	projectURLRe    = regexp.MustCompile(`✱ The build folder has been uploaded to (\s*\[+?\s*(\!?)\s*([a-z]*)\s*\|?\s*([a-z0-9\.\-_]*)\s*\]+?)?\s*([^\s]+)\s*\..*`)
 )
 
@@ -23,7 +23,7 @@ func parseProgramOutput(ranking *model.Fa2017Ece408Ranking, s string) {
 		return
 	}
 	matches := programOutputRe.FindAllStringSubmatch(s, 1)[0]
-	if len(matches) < 4 {
+	if len(matches) < 3 {
 		log.WithField("match_count", len(matches)).
 			Debug("Unexpected number of matches while parsing program output")
 		return
@@ -32,11 +32,7 @@ func parseProgramOutput(ranking *model.Fa2017Ece408Ranking, s string) {
 	if err == nil {
 		ranking.Correctness = correctness
 	}
-	batchSize, err := strconv.Atoi(matches[2])
-	if err == nil {
-		ranking.BatchSize = batchSize
-	}
-	ranking.Model = matches[3]
+	ranking.Model = matches[2]
 
 	return
 }
