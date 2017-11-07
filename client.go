@@ -186,6 +186,8 @@ func (c *client) RecordIfSubmission() error {
 	c.ranking.Username = user.Username
 	c.ranking.Teamname = user.Team.Name
 	c.ranking.CreatedAt = time.Now()
+	log.Debug("Submission username: " + c.ranking.Username)
+	log.Debug("Submission teamname: " + c.ranking.Teamname)
 
 	err = tbl.Insert(c.ranking)
 	log.Info("Inserted ranking ranking")
