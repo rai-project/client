@@ -177,6 +177,13 @@ func (c *client) RecordIfSubmission() error {
 	if c.ranking == nil {
 		log.Error("submission ranking was not filled")
 	}
+
+	prof, err := provider.New()
+	user := prof.Info()
+	c.ranking.Username = user.Username
+	c.ranking.Teamname = user.Team.Name
+	c.ranking.CreatedAt = time.Now()
+
 	err = tbl.Insert(c.ranking)
 	log.Info("Inserted ranking ranking")
 
