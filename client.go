@@ -37,7 +37,6 @@ import (
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
-	"gopkg.in/mgo.v2/bson"
 	"gopkg.in/yaml.v2"
 )
 
@@ -276,7 +275,6 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 	parse := func(w io.WriteCloser, resp model.JobResponse) {
 		if c.ranking == nil {
 			c.ranking = &model.Fa2017Ece408Ranking{}
-			c.ranking.ID = bson.NewObjectId()
 		}
 		parseLine(c.ranking, strings.TrimSpace(string(resp.Body)))
 	}
