@@ -158,27 +158,13 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
-func (c *client) RecordIfSubmission() error {
-
-	if !c.options.isSubmission {
-		return nil
-	}
-
-	db, err := mongodb.NewDatabase(config.App.Name)
-	if err != nil {
-		return err
-	}
-	log.Info("Connected to submission database")
-	defer db.Close()
-
-	tbl, err := mongodb.NewTable(db, "rankings")
-	if err != nil {
-		return err
-	}
+func (c *client) RecordRanking() error {
 
 	if c.ranking == nil {
 		log.Error("submission ranking was not filled")
 	}
+
+	isSubmission := c.options.isSubmission
 
 	prof, err := provider.New()
 	user := prof.Info()
@@ -188,8 +174,28 @@ func (c *client) RecordIfSubmission() error {
 	log.Debug("Submission username: " + c.ranking.Username)
 	log.Debug("Submission teamname: " + c.ranking.Teamname)
 
+	c.ranking.IsSubmission = isSubmission
+	if isSubmission {
+		if c.ranking.Teamname == "" {
+			return errors.New("No team name found during submission")
+		}
+	}
+
+	log.Info("Connecting to submission database: ", config.App.Name)
+	db, err := mongodb.NewDatabase(config.App.Name)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	log.Info("Connecting to table: rankings")
+	tbl, err := mongodb.NewTable(db, "rankings")
+	if err != nil {
+		return err
+	}
+
 	err = tbl.Insert(c.ranking)
-	log.Info("Inserted ranking ranking")
+	log.Info("Inserted ranking")
 
 	return err
 }
