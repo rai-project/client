@@ -189,14 +189,14 @@ func (c *client) RecordRanking() error {
 	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
-	tbl, err := mongodb.NewTable(db, "rankings")
+	col, err := model.NewFa2017Ece408RankingCollection(db)
 	if err != nil {
 		return err
 	}
+	defer col.Close()
 
-	err = tbl.Insert(c.ranking)
+	err = col.Insert(c.ranking)
 	log.Info("Inserted ranking")
-
 	return err
 }
 
