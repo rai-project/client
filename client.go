@@ -79,6 +79,9 @@ var (
 	DefaultUploadExpiration = func() time.Time {
 		return time.Now().AddDate(0, 0, 1) // tomorrow
 	}
+	SUbmissionUploadExpiration = func() time.Time {
+		return time.Now().AddDate(0, 6, 0) // six months from now
+	}
 )
 
 // JobQueueName returns the job queue name from option, build file, or config in that order
@@ -342,11 +345,15 @@ func (c *client) Upload() error {
 	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + "." + archive.Extension()
+	uploadExpiration := DefaultUploadExpiration()
+	if c.options.isSubmission {
+		uploadExpiration = SUbmissionUploadExpiration()
+	}
 
 	key, err := st.UploadFrom(
 		zippedReader,
 		uploadKey,
-		s3.Expiration(DefaultUploadExpiration()),
+		s3.Expiration(uploadExpiration),
 		s3.Metadata(map[string]interface{}{
 			"id":         c.ID,
 			"type":       "user_upload",
