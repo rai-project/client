@@ -81,21 +81,24 @@ func Stderr(s io.WriteCloser) Option {
 	}
 }
 
-func SubmissionKindM2() Option {
+func SubmissionM2() Option {
 	return func(o *Options) {
 		o.submissionKind = m2
+		o.isSubmission = true
 	}
 }
 
-func SubmissionKindM3() Option {
+func SubmissionM3() Option {
 	return func(o *Options) {
 		o.submissionKind = m3
+		o.isSubmission = true
 	}
 }
 
-func SubmissionKindFinal() Option {
+func SubmissionFinal() Option {
 	return func(o *Options) {
 		o.submissionKind = final
+		o.isSubmission = true
 	}
 }
 
