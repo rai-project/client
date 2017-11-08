@@ -3,6 +3,14 @@ package client
 import "time"
 import "io"
 
+type submissionKind string
+
+const (
+	final submissionKind = "final"
+	m2    submissionKind = "m2"
+	m3    submissionKind = "m3"
+)
+
 // Options ...
 type Options struct {
 	directory         string
@@ -13,6 +21,7 @@ type Options struct {
 	stdout            io.WriteCloser
 	stderr            io.WriteCloser
 	jobQueueName      string
+	submissionKind    submissionKind
 }
 
 // Option ...
@@ -69,6 +78,24 @@ func Stdout(s io.WriteCloser) Option {
 func Stderr(s io.WriteCloser) Option {
 	return func(o *Options) {
 		o.stderr = s
+	}
+}
+
+func SubmissionKindM2() Option {
+	return func(o *Options) {
+		o.submissionKind = m2
+	}
+}
+
+func SubmissionKindM3() Option {
+	return func(o *Options) {
+		o.submissionKind = m3
+	}
+}
+
+func SubmissionKindFinal() Option {
+	return func(o *Options) {
+		o.submissionKind = final
 	}
 }
 
