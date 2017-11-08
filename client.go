@@ -389,6 +389,7 @@ func (c *client) Publish() error {
 			ID:        c.ID,
 			CreatedAt: time.Now(),
 		},
+		ClientVersion:      config.App.Version,
 		UploadKey:          c.uploadKey,
 		User:               profile.User,
 		BuildSpecification: c.buildSpec,
