@@ -55,7 +55,7 @@ type client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	ranking               *model.Fa2017Ece408Ranking
+	ranking               *model.Fa2017Ece408Job
 	done                  chan bool
 }
 
@@ -191,7 +191,7 @@ func (c *client) RecordRanking() error {
 	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
-	col, err := model.NewFa2017Ece408RankingCollection(db)
+	col, err := model.NewFa2017Ece408JobCollection(db)
 	if err != nil {
 		return err
 	}
@@ -300,7 +300,7 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(w io.WriteCloser, resp model.JobResponse) {
 		if c.ranking == nil {
-			c.ranking = &model.Fa2017Ece408Ranking{}
+			c.ranking = &model.Fa2017Ece408Job{}
 		}
 		parseLine(c.ranking, strings.TrimSpace(string(resp.Body)))
 	}
