@@ -17,4 +17,3 @@ commands:
     - pip install --user -e /mxnet/python   # install python bindings
     - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/m2.1.py ece408-high
     - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/m2.1.py ece408-low
-
