@@ -9,6 +9,7 @@ import (
 )
 
 type clientConfig struct {
+	AnalyticsKey               string        `json:"analytics_key" config:"client.analytics_key"`
 	UploadBucketName           string        `json:"upload_bucket" config:"client.upload_bucket" default:"files.rai-project.com"`
 	UploadDestinationDirectory string        `json:"upload_destination_directory" config:"client.upload_destination_directory" default:"userdata"`
 	BuildFileBaseName          string        `json:"build_file" config:"client.build_file" default:"default"`

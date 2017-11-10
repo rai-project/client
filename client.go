@@ -3,6 +3,7 @@ package client
 //go:generate esc -o fixtures.go -pkg client _fixtures/rai_submission.yml
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"os"
@@ -13,11 +14,14 @@ import (
 
 	"fmt"
 
+	"github.com/AlekSi/pointer"
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
+	gamp "github.com/olebedev/go-gamp"
+	"github.com/olebedev/go-gamp/client/gampops"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
 	"github.com/rai-project/auth"
@@ -43,6 +47,7 @@ import (
 type client struct {
 	ID                    string
 	uploadKey             string
+	analyticsClient       *gampops.Client
 	awsSession            *session.Session
 	mongodb               database.Database
 	options               Options
@@ -102,9 +107,11 @@ func New(opts ...Option) (*client, error) {
 	}
 
 	options := Options{
+		ctx:               context.Background(),
 		directory:         "",
 		isSubmission:      false,
 		buildFileBaseName: Config.BuildFileBaseName,
+		buildFilePath:     "",
 		ratelimit:         ratelimit.Config.RateLimit,
 		profilePath:       auth.DefaultProfilePath,
 		stdout:            nopWriterCloser{out},
@@ -123,7 +130,7 @@ func New(opts ...Option) (*client, error) {
 		options.directory = cwd
 	}
 
-	return &client{
+	clnt := &client{
 		ID:                  uuid.NewV4(),
 		isConnected:         false,
 		options:             options,
@@ -131,7 +138,14 @@ func New(opts ...Option) (*client, error) {
 		configJobQueueName:  Config.JobQueueName,
 		optionsJobQueueName: options.jobQueueName,
 		done:                make(chan bool),
-	}, nil
+	}
+
+	if Config.AnalyticsKey != "" {
+		analyticsClient := gamp.New(options.ctx, Config.AnalyticsKey)
+		clnt.analyticsClient = analyticsClient
+	}
+
+	return clnt, nil
 }
 
 func (c *client) fixDockerPushCredentials() (err error) {
@@ -209,14 +223,45 @@ func (c *client) Validate() error {
 		return err
 	}
 
+	if c.analyticsClient != nil {
+		prof := c.profile.Info()
+		teamName := ""
+		if prof.User.Team != nil {
+			teamName = prof.User.Team.Name
+		}
+		params := gampops.NewCollectParamsWithContext(c.options.ctx).
+			WithTi(pointer.ToString(c.ID)).
+			WithAn(pointer.ToString(config.App.Name)).
+			WithAid(pointer.ToString(config.App.Version.Version)).
+			WithAv(pointer.ToString(config.App.Version.BuildDate)).
+			WithCid(pointer.ToString(prof.User.AccessKey)).
+			WithTa(pointer.ToString(teamName)).
+			WithUID(pointer.ToString(prof.User.Username)).
+			WithT("build").WithV("1")
+		if options.isSubmission {
+			params = params.WithT("submission").WithV("1")
+		}
+		c.analyticsClient.Collect(
+			params,
+		)
+	}
+
 	var buf []byte
 	if options.isSubmission {
 		buf = submissionBuild
 		fmt.Fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
 	} else {
-		buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
+		var buildFilePath string
+		if options.buildFilePath == "" {
+			buildFilePath = filepath.Join(options.directory, options.buildFileBaseName+".yml")
+		} else {
+			buildFilePath = options.buildFilePath
+		}
 		if !com.IsFile(buildFilePath) {
 			return errors.Errorf("the build file [%v] does not exist", buildFilePath)
+		}
+		if loc, err := filepath.Abs(buildFilePath); err == nil {
+			buildFilePath = loc
 		}
 		var err error
 		buf, err = ioutil.ReadFile(buildFilePath)

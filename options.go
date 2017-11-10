@@ -1,11 +1,16 @@
 package client
 
-import "time"
-import "io"
+import (
+	"context"
+	"io"
+	"time"
+)
 
 // Options ...
 type Options struct {
+	ctx               context.Context
 	directory         string
+	buildFilePath     string
 	buildFileBaseName string
 	isSubmission      bool
 	profilePath       string
@@ -22,6 +27,13 @@ type Option func(*Options)
 func Directory(d string) Option {
 	return func(o *Options) {
 		o.directory = d
+	}
+}
+
+// BuildFile ...
+func BuildFilePath(s string) Option {
+	return func(o *Options) {
+		o.buildFilePath = s
 	}
 }
 
