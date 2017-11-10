@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+type submissionKind string
+
+const (
+	final submissionKind = "final"
+	m2    submissionKind = "m2"
+	m3    submissionKind = "m3"
+)
+
 // Options ...
 type Options struct {
 	ctx               context.Context
@@ -18,6 +26,7 @@ type Options struct {
 	stdout            io.WriteCloser
 	stderr            io.WriteCloser
 	jobQueueName      string
+	submissionKind    submissionKind
 }
 
 // Option ...
@@ -81,6 +90,27 @@ func Stdout(s io.WriteCloser) Option {
 func Stderr(s io.WriteCloser) Option {
 	return func(o *Options) {
 		o.stderr = s
+	}
+}
+
+func SubmissionM2() Option {
+	return func(o *Options) {
+		o.submissionKind = m2
+		o.isSubmission = true
+	}
+}
+
+func SubmissionM3() Option {
+	return func(o *Options) {
+		o.submissionKind = m3
+		o.isSubmission = true
+	}
+}
+
+func SubmissionFinal() Option {
+	return func(o *Options) {
+		o.submissionKind = final
+		o.isSubmission = true
 	}
 }
 
