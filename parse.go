@@ -12,13 +12,22 @@ import (
 
 var (
 	colorRe         = regexp.MustCompile(`\[(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]`)
-	timeResultRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
+	timeOutputRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
 	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Model: (.*)`)
-	programTimeRe   = regexp.MustCompile(`Op Time: ([-+]?[0-9]*\.?[0-9]+)`)
+	opTimeOutputRe  = regexp.MustCompile(`Op Time: ([-+]?[0-9]*\.?[0-9]+)`)
 	projectURLRe    = regexp.MustCompile(`✱ The build folder has been uploaded to (\s*\[+?\s*(\!?)\s*([a-z]*)\s*\|?\s*([a-z0-9\.\-_]*)\s*\]+?)?\s*([^\s]+)\s*\..*`)
+	newInferenceRe  = regexp.MustCompile(`New Inference`)
 )
 
-func parseProgramOutput(ranking *model.Fa2017Ece408Ranking, s string) {
+func parseNewInference(ranking *model.Fa2017Ece408Job, s string) {
+	if !newInferenceRe.MatchString(s) {
+		return
+	}
+	ranking.StartNewInference()
+	return
+}
+
+func parseProgramOutput(ranking *model.Fa2017Ece408Job, s string) {
 	if !programOutputRe.MatchString(s) {
 		return
 	}
@@ -28,38 +37,39 @@ func parseProgramOutput(ranking *model.Fa2017Ece408Ranking, s string) {
 			Debug("Unexpected number of matches while parsing program output")
 		return
 	}
+
 	correctness, err := strconv.ParseFloat(matches[1], 64)
 	if err == nil {
-		ranking.Correctness = correctness
+		ranking.CurrentInference().Correctness = correctness
 	}
-	ranking.Model = matches[2]
+	ranking.CurrentInference().Model = matches[2]
 
 	return
 }
 
-func parseProgramTime(ranking *model.Fa2017Ece408Ranking, s string) {
-	if !programTimeRe.MatchString(s) {
+func parseOpTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
+	if !opTimeOutputRe.MatchString(s) {
 		return
 	}
-	matches := programTimeRe.FindAllStringSubmatch(s, 1)[0]
+	matches := opTimeOutputRe.FindAllStringSubmatch(s, 1)[0]
 	if len(matches) < 2 {
 		log.WithField("match_count", len(matches)).
-			Debug("Unexpected number of matches while parsing program time")
+			Debug("Unexpected number of matches while parsing op time")
 		return
 	}
 	elapsed, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.OpRuntime += elapsed
+		ranking.CurrentInference().OpRuntime += elapsed
 	}
 
 	return
 }
 
-func parseTimeResult(ranking *model.Fa2017Ece408Ranking, s string) {
-	if !timeResultRe.MatchString(s) {
+func parseTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
+	if !timeOutputRe.MatchString(s) {
 		return
 	}
-	matches := timeResultRe.FindAllStringSubmatch(s, 1)[0]
+	matches := timeOutputRe.FindAllStringSubmatch(s, 1)[0]
 	if len(matches) < 4 {
 		log.WithField("match_count", len(matches)).
 			Debug("Unexpected number of matches while parsing time result")
@@ -67,19 +77,19 @@ func parseTimeResult(ranking *model.Fa2017Ece408Ranking, s string) {
 	}
 	user, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.UserFullRuntime = user
+		ranking.CurrentInference().UserFullRuntime = user
 	}
 	system, err := time.ParseDuration(matches[2] + "s")
 	if err == nil {
-		ranking.SystemFullRuntime = system
+		ranking.CurrentInference().SystemFullRuntime = system
 	}
 	elapsed, err := time.ParseDuration(matches[3] + "s")
 	if err == nil {
-		ranking.ElapsedFullRuntime = elapsed
+		ranking.CurrentInference().ElapsedFullRuntime = elapsed
 	}
 }
 
-func parseProjectURL(ranking *model.Fa2017Ece408Ranking, s string) {
+func parseProjectURL(ranking *model.Fa2017Ece408Job, s string) {
 	if !projectURLRe.MatchString(s) {
 		return
 	}
@@ -101,10 +111,11 @@ func removeColor(s string) string {
 	return colorRe.ReplaceAllString(s, "")
 }
 
-func parseLine(ranking *model.Fa2017Ece408Ranking, s string) {
+func parseLine(ranking *model.Fa2017Ece408Job, s string) {
 	s = removeColor(s)
-	parseProgramTime(ranking, s)
+	parseNewInference(ranking, s)
+	parseOpTimeOutput(ranking, s)
 	parseProgramOutput(ranking, s)
-	parseTimeResult(ranking, s)
+	parseTimeOutput(ranking, s)
 	parseProjectURL(ranking, s)
 }

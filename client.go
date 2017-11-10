@@ -1,7 +1,5 @@
 package client
 
-//go:generate esc -o fixtures.go -pkg client _fixtures/rai_submission.yml
-
 import (
 	"io"
 	"io/ioutil"
@@ -57,13 +55,17 @@ type client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	ranking               *model.Fa2017Ece408Ranking
+	ranking               *model.Fa2017Ece408Job
 	done                  chan bool
 }
 
 var (
-	submissionName  = "_fixtures/rai_submission.yml"
-	submissionBuild = FSMustByte(false, "/"+submissionName)
+	m2Name     = "_fixtures/m2.yml"
+	m3Name     = "_fixtures/m3.yml"
+	finalName  = "_fixtures/final.yml"
+	m2Build    = FSMustByte(false, "/"+m2Name)
+	m3Build    = FSMustByte(false, "/"+m3Name)
+	finalBuild = FSMustByte(false, "/"+finalName)
 )
 
 type nopWriterCloser struct {
@@ -78,7 +80,7 @@ var (
 	DefaultUploadExpiration = func() time.Time {
 		return time.Now().AddDate(0, 0, 1) // tomorrow
 	}
-	SUbmissionUploadExpiration = func() time.Time {
+	SubmissionUploadExpiration = func() time.Time {
 		return time.Now().AddDate(0, 6, 0) // six months from now
 	}
 )
@@ -161,23 +163,23 @@ func (c *client) fixDockerPushCredentials() (err error) {
 func (c *client) RecordRanking() error {
 
 	if c.ranking == nil {
-		log.Error("submission ranking was not filled")
+		return errors.New("ranking uninitialized")
 	}
 
-	isSubmission := c.options.isSubmission
+	c.ranking.CreatedAt = time.Now()
+	c.ranking.IsSubmission = c.options.isSubmission
+	c.ranking.SubmissionTag = string(c.options.submissionKind)
 
 	prof, err := provider.New()
 	user := prof.Info()
 	c.ranking.Username = user.Username
 	c.ranking.Teamname = user.Team.Name
-	c.ranking.CreatedAt = time.Now()
 	log.Debug("Submission username: " + c.ranking.Username)
 	log.Debug("Submission teamname: " + c.ranking.Teamname)
 
-	c.ranking.IsSubmission = isSubmission
-	if isSubmission {
+	if c.ranking.IsSubmission {
 		if c.ranking.Teamname == "" {
-			return errors.New("No team name found during submission")
+			return errors.New("no team name found")
 		}
 	}
 
@@ -189,7 +191,7 @@ func (c *client) RecordRanking() error {
 	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
-	col, err := model.NewFa2017Ece408RankingCollection(db)
+	col, err := model.NewFa2017Ece408JobCollection(db)
 	if err != nil {
 		return err
 	}
@@ -210,8 +212,26 @@ func (c *client) Validate() error {
 	}
 
 	var buf []byte
+
 	if options.isSubmission {
-		buf = submissionBuild
+		switch options.submissionKind {
+		case final:
+			{
+				buf = finalBuild
+			}
+		case m2:
+			{
+				buf = m2Build
+			}
+		case m3:
+			{
+				buf = m3Build
+			}
+		default:
+			{
+				return errors.New("unrecognized submission type " + string(options.submissionKind))
+			}
+		}
 		fmt.Fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
 	} else {
 		buildFilePath := filepath.Join(options.directory, options.buildFileBaseName+".yml")
@@ -233,7 +253,7 @@ func (c *client) Validate() error {
 		for _, requiredFileName := range Config.SubmitRequirements {
 			requiredFilePath := filepath.Join(options.directory, requiredFileName)
 			if !com.IsFile(requiredFilePath) {
-				return errors.Errorf("Didn't find a required file: [%v]", requiredFilePath)
+				return errors.Errorf("Didn't find a file required for submission: [%v]", requiredFilePath)
 			}
 		}
 	}
@@ -280,7 +300,7 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(w io.WriteCloser, resp model.JobResponse) {
 		if c.ranking == nil {
-			c.ranking = &model.Fa2017Ece408Ranking{}
+			c.ranking = &model.Fa2017Ece408Job{}
 		}
 		parseLine(c.ranking, strings.TrimSpace(string(resp.Body)))
 	}
@@ -353,7 +373,7 @@ func (c *client) Upload() error {
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + "." + archive.Extension()
 	uploadExpiration := DefaultUploadExpiration()
 	if c.options.isSubmission {
-		uploadExpiration = SUbmissionUploadExpiration()
+		uploadExpiration = SubmissionUploadExpiration()
 	}
 
 	key, err := st.UploadFrom(
