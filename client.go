@@ -46,6 +46,7 @@ type client struct {
 	ID                    string
 	uploadKey             string
 	analyticsClient       *gampops.Client
+	analyticsClientParams *gampops.CollectParams
 	awsSession            *session.Session
 	mongodb               database.Database
 	options               Options
@@ -231,7 +232,8 @@ func (c *client) Validate() error {
 		if prof.User.Team != nil {
 			teamName = prof.User.Team.Name
 		}
-		params := gampops.NewCollectParamsWithContext(c.options.ctx).
+		params := gampops.NewCollectParams().
+			WithCid(pointer.ToString(prof.User.AccessKey)).
 			WithTi(pointer.ToString(c.ID)).
 			WithAn(pointer.ToString(config.App.Name)).
 			WithAid(pointer.ToString(config.App.Version.Version)).
@@ -239,13 +241,21 @@ func (c *client) Validate() error {
 			WithCid(pointer.ToString(prof.User.AccessKey)).
 			WithTa(pointer.ToString(teamName)).
 			WithUID(pointer.ToString(prof.User.Username)).
-			WithT("build").WithV("1")
+			WithT("event").
+			WithEc(pointer.ToString(config.App.Version.Version)).
+			WithEa(pointer.ToString("build")).
+			WithEl(pointer.ToString("command")).
+			WithSc(pointer.ToString("start"))
 		if options.isSubmission {
-			params = params.WithT("submission").WithV("1")
+			params = params.WithEa(pointer.ToString("submission")).
+				WithEl(pointer.ToString(string(options.submissionKind)))
 		}
-		c.analyticsClient.Collect(
-			params,
-		)
+		err := c.analyticsClient.Collect(params)
+		if err != nil {
+			log.WithError(err).Info("failed to publish analytics")
+		} else {
+			c.analyticsClientParams = params
+		}
 	}
 
 	var buf []byte
@@ -545,6 +555,10 @@ func (c *client) Disconnect() error {
 
 	if c.pubsubConn != nil {
 		c.pubsubConn.Close()
+	}
+
+	if c.analyticsClient != nil && c.analyticsClientParams != nil {
+		c.analyticsClient.Collect(c.analyticsClientParams.WithSc(pointer.ToString("end")))
 	}
 
 	return c.broker.Disconnect()
