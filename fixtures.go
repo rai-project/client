@@ -192,46 +192,49 @@ var _escData = map[string]*_escFile{
 
 	"/_fixtures/final.yml": {
 		local:   "_fixtures/final.yml",
-		size:    770,
-		modtime: 1510323992,
+		size:    880,
+		modtime: 1511905976,
 		compressed: `
-H4sIAAAAAAAC/7SRvY7bMBCEez3FwI6bADR1hpEclDKPcEhtUNRKIsw/cEk7fvuAtHzVtakI7M7Ofjvc
-46OMzjCb4DEbS5hDAmnCuX/HrKzFqX/72SVlhg64UarKAf3x1AHGqYUG6HsklTh4WbWzupCmc/9+cX89
-5csU9JXSoNz04yyWWIRVmTh3iTiUpImrsY6lPoBKejWZdC6JBrShDli+bkfFWtnW0KH4POCtAzzle0jX
-oeIzdTo4p/zU1ozF2OnpJCBH4+WoeIXQ2OkIkW6QnLT8DtmUO+yhQ3wgh60CDsgr4YkOFdvlML5VS7RB
-TV/a11g56arc0mmLfmEKqKtv+FbbsmXWIEKkpHJIUhfOwclj1Xr6ZNoQ6qdxBWyTyIloA/BGE4Q/9XDq
-ShC/N3fsnzk8JzZxNBHGc64/LkRhShD0womPvAYPYP+p2Uqj8ZPxC79uLpza3dk4gpixO/xpXocPfnAm
-hwORVZFp2r0sJN2UFayTiZnlbLyyx/jYUhKrWdb/Zm7DvfsXAAD//0SrpRcCAwAA
+H4sIAAAAAAAC/7RSzYrbMBC++yk+ku6loCgbQru4xz7C0nNQ5LEtoj80UtK8fZHshFK2vfVkPPPN9zOj
+Ld7L2RlmEzxGYwljSCBNOO7fMCprcdi/fu2SMn0HXClVZI/97tABxqmJeuhbJJU4eFmxozqRpuP+7eR+
+esqnIegLpV654ctRTLEIqzJx7hJxKEkTV2IdS/0AKunZZNK5JOrRhjpg+rgdFWtlW0OH4nOP1w7wlG8h
+Xfpqn6nTwTnlhyZzLsYOC5OAPBsvz4pnCI2NjhDpCrl4F5y0/AzZIsj6EyIllUOSunAOboMtdIh3TMEO
+tOyOkQPaBJZoyInon2qrTPP1pMxhrYAD8kwPNhXbnmF8q5Zogxo+pK9H5KQrcr1FE/qGIaBKX/Gptv8e
+T+4q1tPT02rhj5i/5fNGE4Q/7OHUhSC+r+zYLltfJlZwNBHGc67vS4jClCDoYSfe8xw8gO0Ts5bOxg/G
+T/zIXDi13Nk4ghixefnRuF7e+c6ZHF6IrIpMw+ZBIemqrGCdTMwsR+OV3cX7uiUxm2n+b+Q23LpfAQAA
+//8eN0w8cAMAAA==
 `,
 	},
 
 	"/_fixtures/m2.yml": {
 		local:   "_fixtures/m2.yml",
-		size:    780,
-		modtime: 1510324978,
+		size:    890,
+		modtime: 1511906017,
 		compressed: `
-H4sIAAAAAAAC/7SRvY7bMBCEez3FwI6bADR1hpEclPJw6VIFqQ2KWlmE+QcuacdvH5CWr7o2FYHd2dlv
-h1v8MpY4B084gMvoDLMJHrOxhDkkvL+949i/4qeyFof+5XuXlBk64EqpKgf0+0MHGKfONEDfIqnEwcuq
-ndWJNB3715P76ymfpqAvlAblpm9HoWMRVmXi3CXiUJImrsY6lvoAKunFZNK5JBrQhjrg/Hk7KtbKtoYO
-xecBfQd4yreQLgNmZZk6HZxTfmprxmLs9HASkKPxclS8QGhsdIRIV0hOWn6FbMoNttAh3pHDWgEH5IXw
-QIeK7XIY36ol2qCmT+1rrJx0Va7ptEU/MAXU1Vd8qW3ZMmsQIVJSOSSpC+fg5L5qPX0wrQj107gCtknk
-RLQCeKMJwh96OHUhiLfVHdtHDo+JVRxNhPGc648LUZgSBD1x4j0vwQPYfmjW0mj8ZPyZnzcXTu3ubBxB
-zNjs/jSv3W++cyaHHZFVkWnaPC0kXZUVrJOJmaU77F/28b6GJBZzXv6Xtw237l8AAAD//6jENYwMAwAA
+H4sIAAAAAAAC/7RSTY/TMBC951c8tewFyXW2qmAVjqvlxglxrlxn2lj1lzx2S/89spNWCC3cOEWZefM+
+ZrzGN2OJc/CELbgcnGE2weNoLOEYEt5e37DrX/BVWYtt//y5S8oMHXChVJED+s22A4xTJxqgr5FU4uBl
+xR7VnjTt+pe9++kp78egz5QG5cZPO6FjEVZl4twl4lCSJq7EOpb6AVTSk8mkc0k0oA11wOn9dlSslW0N
+HYrPA/oO8JSvIZ0HHJVl6nRwTvmxyRyKsePMJCAPxsuD4glCY6UjRLpAzt4FJy0/QrYIsv6ESEnlkKQu
+nINbYQ0d4g2nYEead8fIAW0CczTkRPRPtUWm+XpQ5rBUwAF5ojubim3PML5VS7RBje/S1yNy0hW53KIJ
+fcEYUKUv+FDbf48nNxXr6eFpsfBHzN/yeaMJwm97OHUmiNeFHet56/PEAo4mwnjO9X0JUZgSBN3txFue
+ggewfmCW0sH40fgT3zMXTi13No4gjlg9/WhcT9/5xpkcnoisikzj6k4h6aKsYJ1MzCzddvO8ibdlSWIy
+p+l/cdtw7X4FAAD//7D4ch96AwAA
 `,
 	},
 
 	"/_fixtures/m3.yml": {
 		local:   "_fixtures/m3.yml",
-		size:    780,
-		modtime: 1510324971,
+		size:    924,
+		modtime: 1511905979,
 		compressed: `
-H4sIAAAAAAAC/7SRP48aMRDF+/0UTxCaSMbAoeS0KU+XLlWUGhnv7K6F/8ljQ/j2kc1y1bWpLM28efOb
-5zV+GUucgye8gMvZGWYTPEZjCWNIeH97x3H3ip/KWhx2++9dUqbvgCulquyx2x46wDg1UQ99i6QSBy+r
-dlQn0nTcvZ7cX0/5NAR9odQrN3w7iikWYVUmzl0iDiVp4mqsY6kPoJKeTSadS6IebagDps/bUbFWtjV0
-KD732HeAp3wL6dJjVJap08E55Ye25lyMHR5OAvJsvDwrniE0VjpCpCskJy2/QjblCmvoEO/IYamAA/JM
-eKBDxXY5jG/VEm1Qw6f2NVZOuiqXdNqiHxgC6uorvtS2bJk1iBApqRyS1IVzcHJbtZ4+mBaE+mlcAdsk
-ciJaALzRBOEPOzh1IYi3xR3rRw6PiUUcTYTxnOuPC1GYEgQ9ceI9z8EDWH9oltLZ+MH4iZ83F07t7mwc
-QYxYbf40r81vvnMmhw2RVZFpWD0tJF2VFayTiZmle9nut/G+hCRmM83/y9uGW/cvAAD//4J/SdsMAwAA
+H4sIAAAAAAAC/7RSTY/TMBC951c8tewFyU3brWAVjqvlxglxrlxnkpg6tjVjt/TfIydpD2jhximK5/l9
+jdf4Zh1JCp7wDMmn0YrY4NFZR+gC4+31DYftC75q57Df7j5XrG1TARfigmyw3ewrwI66pwbmGkmzBF8X
+bKePZOiwfTmOvzylYxvMmbjRY/vpoPqYldOJJFVMEjIbkkJsYi4fQLMZbCKTMlOD6VIF9O+Poxaj3TQw
+IfvUYFcBntI18LlBp51QZcI4at9OMqdsXTszKdQn6+uTlgHKYGUiFF9Qz96VsKk/op4i1OUnRGKdAtcm
+SwrjCmuYEG/og2tp7k6QAqYbmKMhMdE/1RaZydeDMnL4SSahK9RcSGcAJCANdCfXcaod1k+nObqg23fV
+yk6FTUEuq5l0v6ANKE78BR/K/O9x600Be3p4XDz8EbvkxdWmIeSEcCG+sk33Brw1BOX3W4z6TFCvix7W
+815mjgUcbYT1ksoLVCoLMRTdDcZbGoIHsH5glqOT9a31vdxryMJTFcmOBNVh9fRj4nr6LjdJNOKJyOko
+1K7uFDVdtFNi2MYk9fi82W3ibelNDbYf/he3C9fqdwAAAP//2MCaAJwDAAA=
 `,
 	},
 
