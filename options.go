@@ -9,24 +9,26 @@ import (
 type submissionKind string
 
 const (
-	final submissionKind = "final"
-	m2    submissionKind = "m2"
-	m3    submissionKind = "m3"
+	final  submissionKind = "final"
+	m2     submissionKind = "m2"
+	m3     submissionKind = "m3"
+	custom submissionKind = "custom"
 )
 
 // Options ...
 type Options struct {
-	ctx               context.Context
-	directory         string
-	buildFilePath     string
-	buildFileBaseName string
-	isSubmission      bool
-	profilePath       string
-	ratelimit         time.Duration
-	stdout            io.WriteCloser
-	stderr            io.WriteCloser
-	jobQueueName      string
-	submissionKind    submissionKind
+	ctx                 context.Context
+	directory           string
+	buildFilePath       string
+	buildFileBaseName   string
+	isSubmission        bool
+	profilePath         string
+	ratelimit           time.Duration
+	stdout              io.WriteCloser
+	stderr              io.WriteCloser
+	jobQueueName        string
+	submissionKind      submissionKind
+	customSubmissionTag string
 }
 
 // Option ...
@@ -111,6 +113,14 @@ func SubmissionFinal() Option {
 	return func(o *Options) {
 		o.submissionKind = final
 		o.isSubmission = true
+	}
+}
+
+func SubmissionCustom(tag string) Option {
+	return func(o *Options) {
+		o.submissionKind = custom
+		o.isSubmission = true
+		o.customSubmissionTag = tag
 	}
 }
 

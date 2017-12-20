@@ -183,7 +183,11 @@ func (c *client) RecordRanking() error {
 
 	c.ranking.CreatedAt = time.Now()
 	c.ranking.IsSubmission = c.options.isSubmission
-	c.ranking.SubmissionTag = string(c.options.submissionKind)
+	if c.options.submissionKind != custom {
+		c.ranking.SubmissionTag = string(c.options.submissionKind)
+	} else {
+		c.ranking.SubmissionTag = c.options.customSubmissionTag
+	}
 
 	prof, err := provider.New()
 	user := prof.Info()
@@ -273,6 +277,11 @@ func (c *client) Validate() error {
 		case m3:
 			{
 				buf = m3Build
+			}
+		case custom:
+			{
+				log.Info("Treating custom submission as final submission")
+				buf = finalBuild
 			}
 		default:
 			{
