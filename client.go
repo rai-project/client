@@ -69,9 +69,11 @@ var (
 	m2Name     = "_fixtures/m2.yml"
 	m3Name     = "_fixtures/m3.yml"
 	finalName  = "_fixtures/final.yml"
+	evalName   = "_fixtures/eval.yml"
 	m2Build    = FSMustByte(false, "/"+m2Name)
 	m3Build    = FSMustByte(false, "/"+m3Name)
 	finalBuild = FSMustByte(false, "/"+finalName)
+	evalBuild  = FSMustByte(false, "/"+evalName)
 )
 
 type nopWriterCloser struct {
@@ -280,8 +282,8 @@ func (c *client) Validate() error {
 			}
 		case custom:
 			{
-				log.Info("Treating custom submission as final submission")
-				buf = finalBuild
+				log.Info("Using embedded eval build for custom submission")
+				buf = evalBuild
 			}
 		default:
 			{
