@@ -583,7 +583,7 @@ func (c *client) Wait() error {
 
 func (c *client) authenticate(profilePath string) error {
 
-	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your athentication credentials."))
+	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your authentication credentials."))
 
 	prof, err := provider.New(auth.ProfilePath(profilePath))
 	if err != nil {
