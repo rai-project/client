@@ -1,4 +1,4 @@
-# Final submission file for ECE 408 Spring 2018
+# Milestone 1 submission file for ECE 408 Spring 2018
 rai:
   version: 0.2
   image: cwpearson/ece408_mxnet_docker:amd64-gpu-2018sp-latest
@@ -15,8 +15,5 @@ commands:
     - /bin/bash -c "for src in ece408_src/*; do cp -v $src /mxnet/src/operator/custom/.; done" # copy source files to mxnet tree
     - nice -n20 make -C /mxnet # build mxnet
     - pip2 install --user -e /mxnet/python   # install python bindings
-    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/final.py
-    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/final.py
-    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/final.py
-    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/final.py
-    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/final.py
+    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/m1.1.py
+    - /usr/bin/time -f "%Uuser %Ssystem %eelapsed" python /eval-scripts/m1.2.py

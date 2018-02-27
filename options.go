@@ -9,9 +9,11 @@ import (
 type submissionKind string
 
 const (
-	final  submissionKind = "final"
+	m1     submissionKind = "m1"
 	m2     submissionKind = "m2"
 	m3     submissionKind = "m3"
+	m4     submissionKind = "m4"
+	final  submissionKind = "final"
 	custom submissionKind = "custom"
 )
 
@@ -95,6 +97,13 @@ func Stderr(s io.WriteCloser) Option {
 	}
 }
 
+func SubmissionM1() Option {
+	return func(o *Options) {
+		o.submissionKind = m1
+		o.isSubmission = true
+	}
+}
+
 func SubmissionM2() Option {
 	return func(o *Options) {
 		o.submissionKind = m2
@@ -105,6 +114,13 @@ func SubmissionM2() Option {
 func SubmissionM3() Option {
 	return func(o *Options) {
 		o.submissionKind = m3
+		o.isSubmission = true
+	}
+}
+
+func SubmissionM4() Option {
+	return func(o *Options) {
+		o.submissionKind = m4
 		o.isSubmission = true
 	}
 }

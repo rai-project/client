@@ -66,12 +66,16 @@ type client struct {
 }
 
 var (
+	m1Name     = "_fixtures/m1.yml"
 	m2Name     = "_fixtures/m2.yml"
 	m3Name     = "_fixtures/m3.yml"
+	m4Name     = "_fixtures/m4.yml"
 	finalName  = "_fixtures/final.yml"
 	evalName   = "_fixtures/eval.yml"
+	m1Build    = FSMustByte(false, "/"+m1Name)
 	m2Build    = FSMustByte(false, "/"+m2Name)
 	m3Build    = FSMustByte(false, "/"+m3Name)
+	m4Build    = FSMustByte(false, "/"+m4Name)
 	finalBuild = FSMustByte(false, "/"+finalName)
 	evalBuild  = FSMustByte(false, "/"+evalName)
 )
@@ -268,9 +272,9 @@ func (c *client) Validate() error {
 
 	if options.isSubmission {
 		switch options.submissionKind {
-		case final:
+		case m1:
 			{
-				buf = finalBuild
+				buf = m1Build
 			}
 		case m2:
 			{
@@ -279,6 +283,14 @@ func (c *client) Validate() error {
 		case m3:
 			{
 				buf = m3Build
+			}
+		case m4:
+			{
+				buf = m4Build
+			}
+		case final:
+			{
+				buf = finalBuild
 			}
 		case custom:
 			{

@@ -1,3 +1,3 @@
-//go:generate esc -o fixtures.go -pkg client _fixtures/final.yml _fixtures/m2.yml _fixtures/m3.yml _fixtures/eval.yml
+//go:generate esc -o fixtures.go -pkg client _fixtures/m1.yml _fixtures/m2.yml _fixtures/m3.yml _fixtures/m4.yml _fixtures/final.yml _fixtures/eval.yml
 
 package client
