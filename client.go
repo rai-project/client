@@ -61,7 +61,7 @@ type client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	ranking               *model.Fa2017Ece408Job
+	job                   *model.Sp2018Ece408Job
 	done                  chan bool
 }
 
@@ -181,29 +181,29 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
-func (c *client) RecordRanking() error {
+func (c *client) RecordJob() error {
 
-	if c.ranking == nil {
+	if c.job == nil {
 		return errors.New("ranking uninitialized")
 	}
 
-	c.ranking.CreatedAt = time.Now()
-	c.ranking.IsSubmission = c.options.isSubmission
+	c.job.CreatedAt = time.Now()
+	c.job.IsSubmission = c.options.isSubmission
 	if c.options.submissionKind != custom {
-		c.ranking.SubmissionTag = string(c.options.submissionKind)
+		c.job.SubmissionTag = string(c.options.submissionKind)
 	} else {
-		c.ranking.SubmissionTag = c.options.customSubmissionTag
+		c.job.SubmissionTag = c.options.customSubmissionTag
 	}
 
 	prof, err := provider.New()
 	user := prof.Info()
-	c.ranking.Username = user.Username
-	c.ranking.Teamname = user.Team.Name
-	log.Debug("Submission username: " + c.ranking.Username)
-	log.Debug("Submission teamname: " + c.ranking.Teamname)
+	c.job.Username = user.Username
+	c.job.Teamname = user.Team.Name
+	log.Debug("Submission username: " + c.job.Username)
+	log.Debug("Submission teamname: " + c.job.Teamname)
 
-	if c.ranking.IsSubmission {
-		if c.ranking.Teamname == "" {
+	if c.job.IsSubmission {
+		if c.job.Teamname == "" {
 			return errors.New("no team name found")
 		}
 	}
@@ -222,8 +222,8 @@ func (c *client) RecordRanking() error {
 	}
 	defer col.Close()
 
-	err = col.Insert(c.ranking)
-	log.Info("Inserted ranking")
+	err = col.Insert(c.job)
+	log.Info("Inserted job record")
 	return err
 }
 
@@ -377,10 +377,10 @@ func (c *client) Validate() error {
 func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(w io.WriteCloser, resp model.JobResponse) {
-		if c.ranking == nil {
-			c.ranking = &model.Fa2017Ece408Job{}
+		if c.job == nil {
+			c.job = &model.Sp2018Ece408Job{}
 		}
-		parseLine(c.ranking, strings.TrimSpace(string(resp.Body)))
+		parseLine(c.job, strings.TrimSpace(string(resp.Body)))
 	}
 
 	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {

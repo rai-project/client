@@ -19,15 +19,15 @@ var (
 	newInferenceRe  = regexp.MustCompile(`New Inference`)
 )
 
-func parseNewInference(ranking *model.Fa2017Ece408Job, s string) {
+func parseNewInference(job *model.Sp2018Ece408Job, s string) {
 	if !newInferenceRe.MatchString(s) {
 		return
 	}
-	ranking.StartNewInference()
+	job.StartNewInference()
 	return
 }
 
-func parseProgramOutput(ranking *model.Fa2017Ece408Job, s string) {
+func parseProgramOutput(job *model.Sp2018Ece408Job, s string) {
 	if !programOutputRe.MatchString(s) {
 		return
 	}
@@ -40,14 +40,14 @@ func parseProgramOutput(ranking *model.Fa2017Ece408Job, s string) {
 
 	correctness, err := strconv.ParseFloat(matches[1], 64)
 	if err == nil {
-		ranking.CurrentInference().Correctness = correctness
+		job.CurrentInference().Correctness = correctness
 	}
-	ranking.CurrentInference().Model = matches[2]
+	job.CurrentInference().Model = matches[2]
 
 	return
 }
 
-func parseOpTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
+func parseOpTimeOutput(job *model.Sp2018Ece408Job, s string) {
 	if !opTimeOutputRe.MatchString(s) {
 		return
 	}
@@ -59,13 +59,13 @@ func parseOpTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
 	}
 	elapsed, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.CurrentInference().OpRuntime += elapsed
+		job.RecordOpRuntime(elapsed)
 	}
 
 	return
 }
 
-func parseTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
+func parseTimeOutput(job *model.Sp2018Ece408Job, s string) {
 	if !timeOutputRe.MatchString(s) {
 		return
 	}
@@ -77,19 +77,19 @@ func parseTimeOutput(ranking *model.Fa2017Ece408Job, s string) {
 	}
 	user, err := time.ParseDuration(matches[1] + "s")
 	if err == nil {
-		ranking.CurrentInference().UserFullRuntime = user
+		job.CurrentInference().UserFullRuntime = user
 	}
 	system, err := time.ParseDuration(matches[2] + "s")
 	if err == nil {
-		ranking.CurrentInference().SystemFullRuntime = system
+		job.CurrentInference().SystemFullRuntime = system
 	}
 	elapsed, err := time.ParseDuration(matches[3] + "s")
 	if err == nil {
-		ranking.CurrentInference().ElapsedFullRuntime = elapsed
+		job.CurrentInference().ElapsedFullRuntime = elapsed
 	}
 }
 
-func parseProjectURL(ranking *model.Fa2017Ece408Job, s string) {
+func parseProjectURL(job *model.Sp2018Ece408Job, s string) {
 	if !projectURLRe.MatchString(s) {
 		return
 	}
@@ -101,7 +101,7 @@ func parseProjectURL(ranking *model.Fa2017Ece408Job, s string) {
 	}
 	u, err := url.Parse(matches[len(matches)-1])
 	if err == nil {
-		ranking.ProjectURL = u.String()
+		job.ProjectURL = u.String()
 	}
 	return
 }
@@ -111,11 +111,11 @@ func removeColor(s string) string {
 	return colorRe.ReplaceAllString(s, "")
 }
 
-func parseLine(ranking *model.Fa2017Ece408Job, s string) {
+func parseLine(job *model.Sp2018Ece408Job, s string) {
 	s = removeColor(s)
-	parseNewInference(ranking, s)
-	parseOpTimeOutput(ranking, s)
-	parseProgramOutput(ranking, s)
-	parseTimeOutput(ranking, s)
-	parseProjectURL(ranking, s)
+	parseNewInference(job, s)
+	parseOpTimeOutput(job, s)
+	parseProgramOutput(job, s)
+	parseTimeOutput(job, s)
+	parseProjectURL(job, s)
 }
