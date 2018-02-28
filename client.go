@@ -223,7 +223,7 @@ func (c *client) RecordJob() error {
 	defer col.Close()
 
 	err = col.Insert(c.job)
-	log.Info("Inserted job record")
+	log.Debug("Inserted job record:", c.job)
 	return err
 }
 
