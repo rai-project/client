@@ -310,6 +310,10 @@ func (c *client) Validate() error {
 		} else {
 			buildFilePath = options.buildFilePath
 		}
+    absBuildFilePath, err = filepath.Abs(buildFilePath)
+    if err == nil {
+      buildFilePath = absBuildFilePath
+    }
 		if !com.IsFile(buildFilePath) {
 			return errors.Errorf("the build file [%v] does not exist", buildFilePath)
 		}
