@@ -310,7 +310,7 @@ func (c *client) Validate() error {
 		} else {
 			buildFilePath = options.buildFilePath
 		}
-    absBuildFilePath, err = filepath.Abs(buildFilePath)
+    absBuildFilePath, err := filepath.Abs(buildFilePath)
     if err == nil {
       buildFilePath = absBuildFilePath
     }
