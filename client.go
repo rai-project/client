@@ -320,7 +320,6 @@ func (c *client) Validate() error {
 		if loc, err := filepath.Abs(buildFilePath); err == nil {
 			buildFilePath = loc
 		}
-		var err error
 		buf, err = ioutil.ReadFile(buildFilePath)
 		if err != nil {
 			return errors.Wrapf(err, "unable to read %v", buildFilePath)
