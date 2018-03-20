@@ -40,6 +40,10 @@ import (
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
 	"gopkg.in/yaml.v2"
+
+  //upper "upper.io/db.v3"
+  // "sort"
+  // "github.com/aws/aws-sdk-go/service/codepipeline"
 )
 
 type client struct {
@@ -198,8 +202,17 @@ func (c *client) RecordJob() error {
 	prof, err := provider.New()
 	user := prof.Info()
 	c.job.Username = user.Username
-	c.job.Teamname = user.Team.Name
+
 	log.Debug("Submission username: " + c.job.Username)
+
+	db, err := mongodb.NewDatabase("rai")
+  if err != nil {
+    return err
+  }
+  defer db.Close()
+
+  c.job.Teamname, err = ReturnTeamName(c.job.Username)
+
 	log.Debug("Submission teamname: " + c.job.Teamname)
 
 	if c.job.IsSubmission {
@@ -207,13 +220,6 @@ func (c *client) RecordJob() error {
 			return errors.New("no team name found")
 		}
 	}
-
-	log.Info("Connecting to submission database: ", config.App.Name)
-	db, err := mongodb.NewDatabase(config.App.Name)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
 	col, err := model.NewFa2017Ece408JobCollection(db)
@@ -310,16 +316,13 @@ func (c *client) Validate() error {
 		} else {
 			buildFilePath = options.buildFilePath
 		}
-    absBuildFilePath, err := filepath.Abs(buildFilePath)
-    if err == nil {
-      buildFilePath = absBuildFilePath
-    }
 		if !com.IsFile(buildFilePath) {
 			return errors.Errorf("the build file [%v] does not exist", buildFilePath)
 		}
 		if loc, err := filepath.Abs(buildFilePath); err == nil {
 			buildFilePath = loc
 		}
+		var err error
 		buf, err = ioutil.ReadFile(buildFilePath)
 		if err != nil {
 			return errors.Wrapf(err, "unable to read %v", buildFilePath)
