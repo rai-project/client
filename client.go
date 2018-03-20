@@ -205,12 +205,6 @@ func (c *client) RecordJob() error {
 
 	log.Debug("Submission username: " + c.job.Username)
 
-	db, err := mongodb.NewDatabase("rai")
-  if err != nil {
-    return err
-  }
-  defer db.Close()
-
   c.job.Teamname, err = ReturnTeamName(c.job.Username)
 
 	log.Debug("Submission teamname: " + c.job.Teamname)
@@ -220,6 +214,12 @@ func (c *client) RecordJob() error {
 			return errors.New("no team name found")
 		}
 	}
+
+  db, err := mongodb.NewDatabase("rai")
+  if err != nil {
+    return err
+  }
+  defer db.Close()
 
 	log.Info("Connecting to table: rankings")
 	col, err := model.NewFa2017Ece408JobCollection(db)
