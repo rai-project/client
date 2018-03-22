@@ -222,7 +222,7 @@ func (c *client) RecordJob() error {
   defer db.Close()
 
 	log.Info("Connecting to table: rankings")
-	col, err := model.NewFa2017Ece408JobCollection(db)
+	col, err := model.NewSp2018Ece408JobCollection(db)
 	if err != nil {
 		return err
 	}
