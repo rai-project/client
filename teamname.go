@@ -51,6 +51,11 @@ func ReturnTeamName(uname string) (string, error) {
     return "", errors.New("More than one Team entry for " + uname + ".")
   }
 
+  if len(teams) == 0 {
+
+    return "", errors.New("No Team entry for " + uname + ".")
+  }
+
 	return teams[0].Team.Teamname, nil
 }
 
