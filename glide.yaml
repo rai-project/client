@@ -11,11 +11,9 @@ import:
 - package: github.com/briandowns/spinner
   version: ^1.0.0
 - package: github.com/fatih/color
-  version: master
 - package: github.com/k0kubun/pp
   version: ~2.3.0
 - package: github.com/mattn/go-colorable
-  version: master
 - package: github.com/olebedev/go-gamp
   subpackages:
   - client/gampops
