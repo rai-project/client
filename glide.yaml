@@ -34,6 +34,7 @@ import:
   subpackages:
   - redis
 - package: github.com/rai-project/database
+  version: master
   subpackages:
   - mongodb
 - package: github.com/rai-project/ratelimit
