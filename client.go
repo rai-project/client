@@ -40,10 +40,9 @@ import (
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
 	"gopkg.in/yaml.v2"
-
-  //upper "upper.io/db.v3"
-  // "sort"
-  // "github.com/aws/aws-sdk-go/service/codepipeline"
+	//upper "upper.io/db.v3"
+	// "sort"
+	// "github.com/aws/aws-sdk-go/service/codepipeline"
 )
 
 type client struct {
@@ -205,7 +204,7 @@ func (c *client) RecordJob() error {
 
 	log.Debug("Submission username: " + c.job.Username)
 
-  c.job.Teamname, err = ReturnTeamName(c.job.Username)
+	c.job.Teamname, err = ReturnTeamName(c.job.Username)
 
 	log.Debug("Submission teamname: " + c.job.Teamname)
 
@@ -215,11 +214,11 @@ func (c *client) RecordJob() error {
 		}
 	}
 
-  db, err := mongodb.NewDatabase("rai")
-  if err != nil {
-    return err
-  }
-  defer db.Close()
+	db, err := mongodb.NewDatabase("rai")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
 	col, err := model.NewSp2018Ece408JobCollection(db)
@@ -279,34 +278,20 @@ func (c *client) Validate() error {
 	if options.isSubmission {
 		switch options.submissionKind {
 		case m1:
-			{
-				buf = m1Build
-			}
+			buf = m1Build
 		case m2:
-			{
-				buf = m2Build
-			}
+			buf = m2Build
 		case m3:
-			{
-				buf = m3Build
-			}
+			buf = m3Build
 		case m4:
-			{
-				buf = m4Build
-			}
+			buf = m4Build
 		case final:
-			{
-				buf = finalBuild
-			}
+			buf = finalBuild
 		case custom:
-			{
-				log.Info("Using embedded eval build for custom submission")
-				buf = evalBuild
-			}
+			log.Info("Using embedded eval build for custom submission")
+			buf = evalBuild
 		default:
-			{
-				return errors.New("unrecognized submission type " + string(options.submissionKind))
-			}
+			return errors.New("unrecognized submission type " + string(options.submissionKind))
 		}
 		fmt.Fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
 	} else {
