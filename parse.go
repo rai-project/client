@@ -19,7 +19,7 @@ var (
 	newInferenceRe  = regexp.MustCompile(`New Inference`)
 )
 
-func parseNewInference(job *model.Sp2018Ece408Job, s string) {
+func parseNewInference(job *model.Ece408Job, s string) {
 	if !newInferenceRe.MatchString(s) {
 		return
 	}
@@ -27,7 +27,7 @@ func parseNewInference(job *model.Sp2018Ece408Job, s string) {
 	return
 }
 
-func parseProgramOutput(job *model.Sp2018Ece408Job, s string) {
+func parseProgramOutput(job *model.Ece408Job, s string) {
 	if !programOutputRe.MatchString(s) {
 		return
 	}
@@ -47,7 +47,7 @@ func parseProgramOutput(job *model.Sp2018Ece408Job, s string) {
 	return
 }
 
-func parseOpTimeOutput(job *model.Sp2018Ece408Job, s string) {
+func parseOpTimeOutput(job *model.Ece408Job, s string) {
 	if !opTimeOutputRe.MatchString(s) {
 		return
 	}
@@ -65,7 +65,7 @@ func parseOpTimeOutput(job *model.Sp2018Ece408Job, s string) {
 	return
 }
 
-func parseTimeOutput(job *model.Sp2018Ece408Job, s string) {
+func parseTimeOutput(job *model.Ece408Job, s string) {
 	if !timeOutputRe.MatchString(s) {
 		return
 	}
@@ -89,7 +89,7 @@ func parseTimeOutput(job *model.Sp2018Ece408Job, s string) {
 	}
 }
 
-func parseProjectURL(job *model.Sp2018Ece408Job, s string) {
+func parseProjectURL(job *model.Ece408Job, s string) {
 	if !projectURLRe.MatchString(s) {
 		return
 	}
@@ -111,7 +111,7 @@ func removeColor(s string) string {
 	return colorRe.ReplaceAllString(s, "")
 }
 
-func parseLine(job *model.Sp2018Ece408Job, s string) {
+func parseLine(job *model.Ece408Job, s string) {
 	s = removeColor(s)
 	parseNewInference(job, s)
 	parseOpTimeOutput(job, s)

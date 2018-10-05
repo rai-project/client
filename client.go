@@ -40,12 +40,9 @@ import (
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
 	"gopkg.in/yaml.v2"
-	//upper "upper.io/db.v3"
-	// "sort"
-	// "github.com/aws/aws-sdk-go/service/codepipeline"
 )
 
-type client struct {
+type Client struct {
 	ID                    string
 	uploadKey             string
 	analyticsClient       *gampops.Client
@@ -64,7 +61,7 @@ type client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	job                   *model.Sp2018Ece408Job
+	job                   *model.Ece408Job
 	done                  chan bool
 }
 
@@ -101,7 +98,7 @@ var (
 )
 
 // JobQueueName returns the job queue name from option, build file, or config in that order
-func (c *client) JobQueueName() string {
+func (c *Client) JobQueueName() string {
 	if c.optionsJobQueueName != "" {
 		return c.optionsJobQueueName
 	} else if c.buildFileJobQueueName != "" {
@@ -111,7 +108,7 @@ func (c *client) JobQueueName() string {
 }
 
 // New ...
-func New(opts ...Option) (*client, error) {
+func New(opts ...Option) (*Client, error) {
 	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
 	if !config.App.Color {
 		out = colorable.NewNonColorable(out)
@@ -142,7 +139,7 @@ func New(opts ...Option) (*client, error) {
 		options.directory = cwd
 	}
 
-	clnt := &client{
+	clnt := &Client{
 		ID:                  uuid.NewV4(),
 		isConnected:         false,
 		options:             options,
@@ -160,7 +157,7 @@ func New(opts ...Option) (*client, error) {
 	return clnt, nil
 }
 
-func (c *client) fixDockerPushCredentials() (err error) {
+func (c *Client) fixDockerPushCredentials() (err error) {
 	profileInfo := c.profile.Info()
 	if profileInfo.DockerHub == nil {
 		return
@@ -184,7 +181,7 @@ func (c *client) fixDockerPushCredentials() (err error) {
 	return
 }
 
-func (c *client) RecordJob() error {
+func (c *Client) RecordJob() error {
 
 	if c.job == nil {
 		return errors.New("ranking uninitialized")
@@ -221,7 +218,7 @@ func (c *client) RecordJob() error {
 	defer db.Close()
 
 	log.Info("Connecting to table: rankings")
-	col, err := model.NewSp2018Ece408JobCollection(db)
+	col, err := model.NewEce408JobCollection(db)
 	if err != nil {
 		return err
 	}
@@ -233,7 +230,7 @@ func (c *client) RecordJob() error {
 }
 
 // Validate ...
-func (c *client) Validate() error {
+func (c *Client) Validate() error {
 	options := c.options
 
 	// Authenticate user
@@ -365,11 +362,11 @@ func (c *client) Validate() error {
 	return nil
 }
 
-func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
+func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(w io.WriteCloser, resp model.JobResponse) {
 		if c.job == nil {
-			c.job = &model.Sp2018Ece408Job{}
+			c.job = &model.Ece408Job{}
 		}
 		parseLine(c.job, strings.TrimSpace(string(resp.Body)))
 	}
@@ -411,7 +408,7 @@ func (c *client) resultHandler(msgs <-chan pubsub.Message) error {
 }
 
 // Upload ...
-func (c *client) Upload() error {
+func (c *Client) Upload() error {
 	if c.awsSession == nil {
 		log.Fatal("Expecting the awsSession to be set. Call Init before calling Upload")
 		return errors.New("invalid usage")
@@ -469,7 +466,7 @@ func (c *client) Upload() error {
 }
 
 // Publish ...
-func (c *client) Publish() error {
+func (c *Client) Publish() error {
 
 	profile := c.profile.Info()
 
@@ -528,7 +525,7 @@ func (c *client) Publish() error {
 }
 
 // Subscribe ...
-func (c *client) Subscribe() error {
+func (c *Client) Subscribe() error {
 	redisConn, err := redis.New()
 	if err != nil {
 		return errors.Wrap(err, "cannot create a redis connection")
@@ -549,7 +546,7 @@ func (c *client) Subscribe() error {
 }
 
 // Connect ...
-func (c *client) Connect() error {
+func (c *Client) Connect() error {
 	if err := c.broker.Connect(); err != nil {
 		return err
 	}
@@ -558,7 +555,7 @@ func (c *client) Connect() error {
 }
 
 // Disconnect ...
-func (c *client) Disconnect() error {
+func (c *Client) Disconnect() error {
 	if !c.isConnected {
 		return nil
 	}
@@ -579,12 +576,12 @@ func (c *client) Disconnect() error {
 }
 
 // Wait ...
-func (c *client) Wait() error {
+func (c *Client) Wait() error {
 	<-c.done
 	return nil
 }
 
-func (c *client) authenticate(profilePath string) error {
+func (c *Client) authenticate(profilePath string) error {
 
 	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your authentication credentials."))
 

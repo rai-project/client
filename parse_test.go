@@ -13,7 +13,7 @@ import (
 func TestParse(t *testing.T) {
 	s := "✱ The build folder has been uploaded to http://s3.amazonaws.com/rai-server/uploads%2F629mfvXRR.tar.bz2. The data will be present for only a short duration of time."
 
-	ranking := &model.Fa2017Ece408Job{}
+	ranking := &model.Ece408Job{}
 	require.True(t, projectURLRe.MatchString(s))
 	parseLine(ranking, s)
 	assert.NotEmpty(t, ranking)
@@ -22,7 +22,7 @@ func TestParse(t *testing.T) {
 func TestParseTimeResult(t *testing.T) {
 	s := "4.85user 2.97system 5.25elapsed 148%CPU (0avgtext+0avgdata 1319488maxresident)"
 
-	ranking := &model.Fa2017Ece408Job{}
+	ranking := &model.Ece408Job{}
 	ranking.StartNewInference()
 	require.True(t, timeOutputRe.MatchString(s))
 	parseTimeOutput(ranking, s)
@@ -33,7 +33,7 @@ func TestParseTimeResult(t *testing.T) {
 func TestParseProgramOutput(t *testing.T) {
 	s := "Correctness: 0.1 Model: blah-wh@tever$/ugh"
 
-	ranking := &model.Fa2017Ece408Job{}
+	ranking := &model.Ece408Job{}
 	ranking.StartNewInference()
 	require.True(t, programOutputRe.MatchString(s))
 	parseProgramOutput(ranking, s)
@@ -45,7 +45,7 @@ func TestParseProgramOutput(t *testing.T) {
 func TestParseNewRanking(t *testing.T) {
 	s := "[New Inference]"
 
-	ranking := &model.Fa2017Ece408Job{}
+	ranking := &model.Ece408Job{}
 	require.True(t, newInferenceRe.MatchString(s))
 	parseNewInference(ranking, s)
 	parseNewInference(ranking, s)
