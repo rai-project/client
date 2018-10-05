@@ -10,8 +10,6 @@ import (
 
 	"path/filepath"
 
-	"fmt"
-
 	"github.com/AlekSi/pointer"
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -290,7 +288,7 @@ func (c *Client) Validate() error {
 		default:
 			return errors.New("unrecognized submission type " + string(options.submissionKind))
 		}
-		fmt.Fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
+		fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
 	} else {
 		var buildFilePath string
 		if options.buildFilePath == "" {
@@ -364,7 +362,7 @@ func (c *Client) Validate() error {
 
 func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 
-	parse := func(w io.WriteCloser, resp model.JobResponse) {
+	parse := func(resp model.JobResponse) {
 		if c.job == nil {
 			c.job = &model.Ece408Job{}
 		}
@@ -372,14 +370,17 @@ func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 	}
 
 	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {
+		if w == nil {
+			return
+		}
 		body := strings.TrimSpace(string(resp.Body))
 		if body == "" {
 			return
 		}
 		if config.IsVerbose {
-			fmt.Fprint(w, "[ "+resp.CreatedAt.String()+"] ")
+			fprint(w, "[ "+resp.CreatedAt.String()+"] ")
 		}
-		fmt.Fprintln(w, body)
+		fprintln(w, body)
 	}
 	go func() {
 		for msg := range msgs {
@@ -395,10 +396,10 @@ func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 				continue
 			}
 			if data.Kind == model.StderrResponse {
-				parse(c.options.stderr, data)
+				parse(data)
 				formatPrint(c.options.stderr, data)
 			} else if data.Kind == model.StdoutResponse {
-				parse(c.options.stderr, data)
+				parse(data)
 				formatPrint(c.options.stderr, data)
 			}
 		}
@@ -422,7 +423,7 @@ func (c *Client) Upload() error {
 		return err
 	}
 
-	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Preparing your project directory for upload."))
+	fprintln(c.options.stdout, color.YellowString("✱ Preparing your project directory for upload."))
 
 	dir := c.options.directory
 	if !com.IsDir(dir) {
@@ -434,7 +435,7 @@ func (c *Client) Upload() error {
 	}
 	defer zippedReader.Close()
 
-	fmt.Fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
+	fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + "." + archive.Extension()
 	uploadExpiration := DefaultUploadExpiration()
@@ -514,12 +515,14 @@ func (c *Client) Publish() error {
 		return err
 	}
 
-	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Your job request has been posted to the queue."))
+	fprintln(c.options.stdout, color.GreenString("✱ Your job request has been posted to the queue."))
 
-	c.spinner = spinner.New(spinner.CharSets[11], 100*time.Millisecond)
-	c.spinner.Suffix = " Waiting for the server to process your request..."
-	c.spinner.Writer = c.options.stdout
-	c.spinner.Start()
+	if c.options.stdout != nil {
+		c.spinner = spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+		c.spinner.Suffix = " Waiting for the server to process your request..."
+		c.spinner.Writer = c.options.stdout
+		c.spinner.Start()
+	}
 
 	return nil
 }
@@ -583,7 +586,7 @@ func (c *Client) Wait() error {
 
 func (c *Client) authenticate(profilePath string) error {
 
-	fmt.Fprintln(c.options.stdout, color.GreenString("✱ Checking your authentication credentials."))
+	fprintln(c.options.stdout, color.GreenString("✱ Checking your authentication credentials."))
 
 	prof, err := provider.New(auth.ProfilePath(profilePath))
 	if err != nil {
