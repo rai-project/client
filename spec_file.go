@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 
 	"github.com/Unknwon/com"
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 func (c *Client) readSpec(buf []byte) error {

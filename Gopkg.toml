@@ -26,10 +26,6 @@
 
 
 [[constraint]]
-  name = "github.com/AlekSi/pointer"
-  version = "1.0.0"
-
-[[constraint]]
   branch = "master"
   name = "github.com/GeertJohan/go-sourcepath"
 
@@ -56,10 +52,6 @@
 [[constraint]]
   name = "github.com/mattn/go-colorable"
   version = "0.0.9"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/olebedev/go-gamp"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -112,10 +104,6 @@
 [[constraint]]
   branch = "master"
   name = "github.com/rai-project/store"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/rai-project/uuid"
 
 [[constraint]]
   branch = "master"
