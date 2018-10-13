@@ -16,7 +16,6 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
-	gamp "github.com/olebedev/go-gamp"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
 	"github.com/rai-project/auth"
@@ -129,11 +128,6 @@ func New(opts ...Option) (*Client, error) {
 		done:                make(chan bool),
 	}
 
-	if Config.AnalyticsKey != "" {
-		analyticsClient := gamp.New(options.ctx, Config.AnalyticsKey)
-		clnt.analyticsClient = analyticsClient
-	}
-
 	return clnt, nil
 }
 
@@ -199,7 +193,7 @@ func (c *Client) RecordJob() error {
 
 	log.Debug("Connecting to table: rankings")
 
-	col, err := model.NewEce408JobCollection(db)
+	col, err := model.NewECE408ResponseBodyCollection(db)
 	if err != nil {
 		return err
 	}
@@ -326,7 +320,7 @@ func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(resp model.JobResponse) {
 		if c.job == nil {
-			c.job = &model.Ece408Job{}
+			c.job = &model.ECE408ResponseBody{}
 		}
 		parseLine(c.job, strings.TrimSpace(string(resp.Body)))
 	}
