@@ -135,14 +135,14 @@ func removeColor(s string) string {
 	return colorRe.ReplaceAllString(s, "")
 }
 
-func (c *Client) parseLine(s string)  {
-  if c.job == nil {
-  c.job := &Ece408JobResponseBody{}
-  }
-  job, ok := c.job(*Ece408JobResponseBody)
-  if !ok {
-    panic("invalid job type")
-  }
+func (c *Client) parseLine(s string) {
+	if c.job == nil {
+		c.job = &Ece408JobResponseBody{}
+	}
+	job, ok := c.job(*Ece408JobResponseBody)
+	if !ok {
+		panic("invalid job type")
+	}
 	s = removeColor(s)
 	parseNewInference(job, s)
 	parseOpTimeOutput(job, s)
