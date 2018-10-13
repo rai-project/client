@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/AlekSi/pointer"
 	"github.com/Unknwon/com"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
@@ -21,7 +20,6 @@ import (
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database"
-	"github.com/rai-project/database/mongodb"
 	"github.com/rai-project/model"
 	"github.com/rai-project/pubsub"
 	"github.com/rai-project/pubsub/redis"
@@ -30,11 +28,11 @@ import (
 	"github.com/rai-project/serializer/json"
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
-	"github.com/rai-project/uuid"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Client struct {
-	ID                    string
+	ID                    bson.ObjectId
 	uploadKey             string
 	awsSession            *session.Session
 	mongodb               database.Database
@@ -50,7 +48,7 @@ type Client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	job                   model.JobResponse
+	job                   *model.JobResponse
 	done                  chan bool
 }
 
@@ -106,7 +104,7 @@ func New(opts ...Option) (*Client, error) {
 
 	for _, o := range opts {
 		o(&options)
-  }
+	}
 
 	if options.directory == "" {
 		cwd, err := os.Getwd()
@@ -114,90 +112,29 @@ func New(opts ...Option) (*Client, error) {
 			return nil, errors.Wrap(err, "cannot find current working directory")
 		}
 		options.directory = cwd
-  }
+	}
 
-
-  if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
-    return nil,err
-  }
-
-	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overridden by client.Options")
-
+	if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
+		return nil, err
+	}
 
 	clnt := &Client{
-		ID:                  uuid.NewV4(),
+		ID:                  bson.NewObjectId(),
 		isConnected:         false,
 		options:             options,
 		serializer:          json.New(),
 		configJobQueueName:  Config.JobQueueName,
-    optionsJobQueueName: options.jobQueueName,
-    buildFileJobQueueName: config.App.Name + "_" + c.buildSpec.Resources.CPU.Architecture,
+		optionsJobQueueName: options.jobQueueName,
 		done:                make(chan bool),
 	}
 
 	return clnt, nil
 }
 
-
-func (c *Client) RecordJob() error {
-
-	if c.job == nil {
-		return errors.New("ranking uninitialized")
-	}
-
-	c.job.CreatedAt = time.Now()
-	c.job.IsSubmission = c.options.isSubmission
-	if c.options.submissionKind != custom {
-		c.job.SubmissionTag = string(c.options.submissionKind)
-	} else {
-		c.job.SubmissionTag = c.options.customSubmissionTag
-	}
-
-	prof, err := provider.New()
-	user := prof.Info()
-	c.job.Username = user.Username
-
-	log.Debug("Submission username: " + c.job.Username)
-
-	c.job.Teamname, err = TeamName(c.job.Username)
-
-	log.Debug("Submission teamname: " + c.job.Teamname)
-
-	if c.job.IsSubmission {
-		if c.job.Teamname == "" {
-			return errors.New("no team name found")
-		}
-	}
-
-	db, err := mongodb.NewDatabase(config.App.Name)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
-	log.Debug("Connecting to table: rankings")
-
-	col, err := model.NewECE408ResponseBodyCollection(db)
-	if err != nil {
-		return err
-	}
-	defer col.Close()
-
-	err = col.Insert(c.job)
-	if err != nil {
-		log.WithError(err).Error("Failed to insert job record:", c.job)
-	}
-
-	return err
-}
-
 func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
 
 	parse := func(resp model.JobResponse) {
-		if c.job == nil {
-			c.job = &model.ECE408ResponseBody{}
-		}
-		parseLine(c.job, strings.TrimSpace(string(resp.Body)))
+		c.parseLine(strings.TrimSpace(string(resp.Body)))
 	}
 
 	formatPrint := func(w io.WriteCloser, resp model.JobResponse) {
@@ -268,7 +205,7 @@ func (c *Client) Upload() error {
 
 	fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
-	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID + "." + archive.Extension()
+	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID.Hex() + "." + archive.Extension()
 	uploadExpiration := DefaultUploadExpiration()
 	if c.options.isSubmission {
 		uploadExpiration = SubmissionUploadExpiration()
@@ -331,9 +268,9 @@ func (c *Client) Publish() error {
 	err = brkr.Publish(
 		c.JobQueueName(),
 		&broker.Message{
-			ID: c.ID,
+			ID: c.ID.Hex(),
 			Header: map[string]string{
-				"id":              c.ID,
+				"id":              c.ID.Hex(),
 				"upload_key":      c.uploadKey,
 				"username":        profile.Username,
 				"user_access_key": profile.AccessKey,
@@ -367,7 +304,7 @@ func (c *Client) Subscribe() error {
 
 	c.pubsubConn = redisConn
 
-	subscribeChannel := config.App.Name + "/log-" + c.ID
+	subscribeChannel := config.App.Name + "/log-" + c.ID.Hex()
 	subscriber, err := redis.NewSubscriber(redisConn, subscribeChannel)
 	if err != nil {
 		return errors.Wrap(err, "cannot create redis subscriber")
@@ -402,10 +339,6 @@ func (c *Client) Disconnect() error {
 		c.pubsubConn.Close()
 	}
 
-	if c.analyticsClient != nil && c.analyticsClientParams != nil {
-		c.analyticsClient.Collect(c.analyticsClientParams.WithSc(pointer.ToString("end")))
-	}
-
 	return c.broker.Disconnect()
 }
 
@@ -422,7 +355,7 @@ func (c *Client) authenticate(profilePath string) error {
 	prof, err := provider.New(auth.ProfilePath(profilePath))
 	if err != nil {
 		return err
-  }
+	}
 
 	ok, err := prof.Verify()
 	if err != nil {

@@ -9,7 +9,7 @@ func (c *Client) createAWSSession() error {
 		aws.Region(aws.AWSRegionUSEast1),
 		aws.AccessKey(aws.Config.AccessKey),
 		aws.SecretKey(aws.Config.SecretKey),
-		aws.Sts(c.ID),
+		aws.Sts(c.ID.Hex()),
 	)
 	if err != nil {
 		return err

@@ -5,6 +5,10 @@ import (
 	"io"
 )
 
+type ValidationError struct {
+	Message string
+}
+
 func fprint(w io.Writer, a ...interface{}) (n int, err error) {
 	if w == nil {
 		return 0, nil
