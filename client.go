@@ -17,7 +17,6 @@ import (
 	"github.com/fatih/color"
 	colorable "github.com/mattn/go-colorable"
 	gamp "github.com/olebedev/go-gamp"
-	"github.com/olebedev/go-gamp/client/gampops"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
 	"github.com/rai-project/auth"
@@ -43,8 +42,6 @@ import (
 type Client struct {
 	ID                    string
 	uploadKey             string
-	analyticsClient       *gampops.Client
-	analyticsClientParams *gampops.CollectParams
 	awsSession            *session.Session
 	mongodb               database.Database
 	options               Options
@@ -59,24 +56,9 @@ type Client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	job                   *model.Ece408Job
+	job                   *model.JobResponse
 	done                  chan bool
 }
-
-var (
-	m1Name     = "_fixtures/m1.yml"
-	m2Name     = "_fixtures/m2.yml"
-	m3Name     = "_fixtures/m3.yml"
-	m4Name     = "_fixtures/m4.yml"
-	finalName  = "_fixtures/final.yml"
-	evalName   = "_fixtures/eval.yml"
-	m1Build    = _escFSMustByte(false, "/"+m1Name)
-	m2Build    = _escFSMustByte(false, "/"+m2Name)
-	m3Build    = _escFSMustByte(false, "/"+m3Name)
-	m4Build    = _escFSMustByte(false, "/"+m4Name)
-	finalBuild = _escFSMustByte(false, "/"+finalName)
-	evalBuild  = _escFSMustByte(false, "/"+evalName)
-)
 
 type nopWriterCloser struct {
 	io.Writer
@@ -215,7 +197,8 @@ func (c *Client) RecordJob() error {
 	}
 	defer db.Close()
 
-	log.Info("Connecting to table: rankings")
+	log.Debug("Connecting to table: rankings")
+
 	col, err := model.NewEce408JobCollection(db)
 	if err != nil {
 		return err
@@ -223,7 +206,10 @@ func (c *Client) RecordJob() error {
 	defer col.Close()
 
 	err = col.Insert(c.job)
-	log.Debug("Inserted job record:", c.job)
+	if err != nil {
+		log.WithError(err).Error("Failed to insert job record:", c.job)
+	}
+
 	return err
 }
 
@@ -241,30 +227,6 @@ func (c *Client) Validate() error {
 		teamName := ""
 		if prof.User.Team != nil {
 			teamName = prof.User.Team.Name
-		}
-		params := gampops.NewCollectParams().
-			WithCid(pointer.ToString(prof.User.AccessKey)).
-			WithTi(pointer.ToString(c.ID)).
-			WithAn(pointer.ToString(config.App.Name)).
-			WithAid(pointer.ToString(config.App.Version.Version)).
-			WithAv(pointer.ToString(config.App.Version.BuildDate)).
-			WithCid(pointer.ToString(prof.User.AccessKey)).
-			WithTa(pointer.ToString(teamName)).
-			WithUID(pointer.ToString(prof.User.Username)).
-			WithT("event").
-			WithEc(pointer.ToString(config.App.Version.Version)).
-			WithEa(pointer.ToString("build")).
-			WithEl(pointer.ToString("command")).
-			WithSc(pointer.ToString("start"))
-		if options.isSubmission {
-			params = params.WithEa(pointer.ToString("submission")).
-				WithEl(pointer.ToString(string(options.submissionKind)))
-		}
-		err := c.analyticsClient.Collect(params)
-		if err != nil {
-			log.WithError(err).Info("failed to publish analytics")
-		} else {
-			c.analyticsClientParams = params
 		}
 	}
 
