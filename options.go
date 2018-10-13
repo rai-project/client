@@ -107,49 +107,6 @@ func Stderr(s io.WriteCloser) Option {
 	}
 }
 
-func SubmissionM1() Option {
-	return func(o *Options) {
-		o.submissionKind = m1
-		o.isSubmission = true
-	}
-}
-
-func SubmissionM2() Option {
-	return func(o *Options) {
-		o.submissionKind = m2
-		o.isSubmission = true
-	}
-}
-
-func SubmissionM3() Option {
-	return func(o *Options) {
-		o.submissionKind = m3
-		o.isSubmission = true
-	}
-}
-
-func SubmissionM4() Option {
-	return func(o *Options) {
-		o.submissionKind = m4
-		o.isSubmission = true
-	}
-}
-
-func SubmissionFinal() Option {
-	return func(o *Options) {
-		o.submissionKind = final
-		o.isSubmission = true
-	}
-}
-
-func SubmissionCustom(tag string) Option {
-	return func(o *Options) {
-		o.submissionKind = custom
-		o.isSubmission = true
-		o.customSubmissionTag = tag
-	}
-}
-
 // JobQueueName ...
 func JobQueueName(s string) Option {
 	return func(o *Options) {

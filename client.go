@@ -3,12 +3,9 @@ package client
 import (
 	"context"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
-
-	"path/filepath"
 
 	"github.com/AlekSi/pointer"
 	"github.com/Unknwon/com"
@@ -20,7 +17,6 @@ import (
 	"github.com/rai-project/archive"
 	"github.com/rai-project/auth"
 	"github.com/rai-project/auth/provider"
-	"github.com/rai-project/aws"
 	"github.com/rai-project/broker"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
@@ -35,7 +31,6 @@ import (
 	"github.com/rai-project/store"
 	"github.com/rai-project/store/s3"
 	"github.com/rai-project/uuid"
-	"gopkg.in/yaml.v2"
 )
 
 type Client struct {
@@ -55,7 +50,7 @@ type Client struct {
 	configJobQueueName    string
 	optionsJobQueueName   string
 	buildFileJobQueueName string
-	job                   *model.JobResponse
+	job                   model.JobResponse
 	done                  chan bool
 }
 
@@ -78,9 +73,11 @@ var (
 
 // JobQueueName returns the job queue name from option, build file, or config in that order
 func (c *Client) JobQueueName() string {
+
 	if c.optionsJobQueueName != "" {
 		return c.optionsJobQueueName
-	} else if c.buildFileJobQueueName != "" {
+	}
+	if c.buildFileJobQueueName != "" {
 		return c.buildFileJobQueueName
 	}
 	return c.configJobQueueName
@@ -88,6 +85,7 @@ func (c *Client) JobQueueName() string {
 
 // New ...
 func New(opts ...Option) (*Client, error) {
+
 	out, err := colorable.NewColorableStdout(), colorable.NewColorableStderr()
 	if !config.App.Color {
 		out = colorable.NewNonColorable(out)
@@ -108,7 +106,7 @@ func New(opts ...Option) (*Client, error) {
 
 	for _, o := range opts {
 		o(&options)
-	}
+  }
 
 	if options.directory == "" {
 		cwd, err := os.Getwd()
@@ -116,7 +114,15 @@ func New(opts ...Option) (*Client, error) {
 			return nil, errors.Wrap(err, "cannot find current working directory")
 		}
 		options.directory = cwd
-	}
+  }
+
+
+  if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
+    return nil,err
+  }
+
+	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overridden by client.Options")
+
 
 	clnt := &Client{
 		ID:                  uuid.NewV4(),
@@ -124,36 +130,14 @@ func New(opts ...Option) (*Client, error) {
 		options:             options,
 		serializer:          json.New(),
 		configJobQueueName:  Config.JobQueueName,
-		optionsJobQueueName: options.jobQueueName,
+    optionsJobQueueName: options.jobQueueName,
+    buildFileJobQueueName: config.App.Name + "_" + c.buildSpec.Resources.CPU.Architecture,
 		done:                make(chan bool),
 	}
 
 	return clnt, nil
 }
 
-func (c *Client) fixDockerPushCredentials() (err error) {
-	profileInfo := c.profile.Info()
-	if profileInfo.DockerHub == nil {
-		return
-	}
-
-	buildImage := c.buildSpec.Commands.BuildImage
-	if buildImage == nil {
-		return
-	}
-	push := buildImage.Push
-	if push == nil {
-		return
-	}
-	if !push.Push {
-		return
-	}
-	if push.Credentials.Username == "" && push.Credentials.Password == "" {
-		push.Credentials.Username = profileInfo.DockerHub.Username
-		push.Credentials.Password = profileInfo.DockerHub.Password
-	}
-	return
-}
 
 func (c *Client) RecordJob() error {
 
@@ -205,115 +189,6 @@ func (c *Client) RecordJob() error {
 	}
 
 	return err
-}
-
-// Validate ...
-func (c *Client) Validate() error {
-	options := c.options
-
-	// Authenticate user
-	if err := c.authenticate(options.profilePath); err != nil {
-		return err
-	}
-
-	if c.analyticsClient != nil {
-		prof := c.profile.Info()
-		teamName := ""
-		if prof.User.Team != nil {
-			teamName = prof.User.Team.Name
-		}
-	}
-
-	var buf []byte
-
-	if options.isSubmission {
-		switch options.submissionKind {
-		case m1:
-			buf = m1Build
-		case m2:
-			buf = m2Build
-		case m3:
-			buf = m3Build
-		case m4:
-			buf = m4Build
-		case final:
-			buf = finalBuild
-		case custom:
-			log.Info("Using embedded eval build for custom submission")
-			buf = evalBuild
-		default:
-			return errors.New("unrecognized submission type " + string(options.submissionKind))
-		}
-		fprintf(c.options.stdout, color.YellowString("Using the following build file for submission:\n%s"), string(buf))
-	} else {
-		var buildFilePath string
-		if options.buildFilePath == "" {
-			buildFilePath = filepath.Join(options.directory, options.buildFileBaseName+".yml")
-		} else {
-			buildFilePath = options.buildFilePath
-		}
-		if !com.IsFile(buildFilePath) {
-			return errors.Errorf("the build file [%v] does not exist", buildFilePath)
-		}
-		if loc, err := filepath.Abs(buildFilePath); err == nil {
-			buildFilePath = loc
-		}
-		var err error
-		buf, err = ioutil.ReadFile(buildFilePath)
-		if err != nil {
-			return errors.Wrapf(err, "unable to read %v", buildFilePath)
-		}
-	}
-
-	if err := yaml.Unmarshal(buf, &c.buildSpec); err != nil {
-		return errors.Wrapf(err, "unable to parse build file")
-	}
-
-	if options.isSubmission {
-		for _, requiredFileName := range Config.SubmitRequirements {
-			requiredFilePath := filepath.Join(options.directory, requiredFileName)
-			if !com.IsFile(requiredFilePath) {
-				return errors.Errorf("Didn't find a file required for submission: [%v]", requiredFilePath)
-			}
-		}
-	}
-	// set the queue from the build file
-	c.buildFileJobQueueName = config.App.Name + "_" + c.buildSpec.Resources.CPU.Architecture
-	log.Debug("inferring queue ", c.buildFileJobQueueName, " from build file. May be overrriden by client.Options")
-
-	if !config.IsDebug {
-		if err := ratelimit.New(ratelimit.Limit(options.ratelimit)); err != nil {
-			return err
-		}
-	}
-
-	if err := c.fixDockerPushCredentials(); err != nil {
-		return err
-	}
-
-	// Create an AWS session
-	session, err := aws.NewSession(
-		aws.Region(aws.AWSRegionUSEast1),
-		aws.AccessKey(aws.Config.AccessKey),
-		aws.SecretKey(aws.Config.SecretKey),
-		aws.Sts(c.ID),
-	)
-	if err != nil {
-		return err
-	}
-	c.awsSession = session
-
-	// Fail early on no connection to submission database
-	if options.isSubmission {
-		db, err := mongodb.NewDatabase(config.App.Name)
-		if err != nil {
-			log.WithError(err).Error("Unable to contact submission database")
-			return err
-		}
-		defer db.Close()
-	}
-
-	return nil
 }
 
 func (c *Client) resultHandler(msgs <-chan pubsub.Message) error {
@@ -547,7 +422,7 @@ func (c *Client) authenticate(profilePath string) error {
 	prof, err := provider.New(auth.ProfilePath(profilePath))
 	if err != nil {
 		return err
-	}
+  }
 
 	ok, err := prof.Verify()
 	if err != nil {
