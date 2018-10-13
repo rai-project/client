@@ -19,18 +19,20 @@ const (
 
 // Options ...
 type Options struct {
-	ctx                 context.Context
-	directory           string
-	buildFilePath       string
-	buildFileBaseName   string
-	isSubmission        bool
-	profilePath         string
-	ratelimit           time.Duration
-	stdout              io.WriteCloser
-	stderr              io.WriteCloser
-	jobQueueName        string
-	submissionKind      submissionKind
-	customSubmissionTag string
+	ctx                  context.Context
+	directory            string
+	buildFilePath        string
+	buildFileBaseName    string
+	isSubmission         bool
+	profilePath          string
+	ratelimit            time.Duration
+	stdout               io.WriteCloser
+	stderr               io.WriteCloser
+	jobQueueName         string
+	submissionKind       submissionKind
+	customSubmissionTag  string
+	outputDirectory      string
+	forceOutputDirectory bool
 }
 
 // Option ...
@@ -81,6 +83,14 @@ func Ratelimit(d time.Duration) Option {
 // DisableRatelimit ...
 func DisableRatelimit() Option {
 	return Ratelimit(0)
+}
+
+// OutputDirectory ...
+func OutputDirectory(dir string, force bool) Option {
+	return func(o *Options) {
+		o.outputDirectory = dir
+		o.forceOutputDirectory = force
+	}
 }
 
 // Stdout ...
