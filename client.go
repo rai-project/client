@@ -199,7 +199,7 @@ func (c *Client) RecordJob() error {
 
 	log.Debug("Submission username: " + c.job.Username)
 
-	c.job.Teamname, err = ReturnTeamName(c.job.Username)
+	c.job.Teamname, err = TeamName(c.job.Username)
 
 	log.Debug("Submission teamname: " + c.job.Teamname)
 
@@ -209,7 +209,7 @@ func (c *Client) RecordJob() error {
 		}
 	}
 
-	db, err := mongodb.NewDatabase("rai")
+	db, err := mongodb.NewDatabase(config.App.Name)
 	if err != nil {
 		return err
 	}
