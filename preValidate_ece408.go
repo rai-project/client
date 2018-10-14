@@ -46,7 +46,7 @@ func (c *Client) validateSubmission() error {
 	}
 	fprintf(c.options.stdout, color.YellowString("✱ Using the following build file for submission:\n%s"), string(buf))
 
-	if err := readSpec(buf); err != nil {
+	if err := c.readSpec(buf); err != nil {
 		return err
 	}
 
@@ -70,6 +70,7 @@ func (c *Client) validateSubmission() error {
 
 // Validate ...
 func (c *Client) preValidate() error {
+	options := c.options
 	if options.isSubmission {
 		if err := c.validateSubmission(); err != nil {
 			return err

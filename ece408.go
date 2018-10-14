@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/rai-project/model"
 )
 
 var (
@@ -26,7 +24,7 @@ var (
 	finalBuild = _escFSMustByte(false, "/"+finalName)
 	evalBuild  = _escFSMustByte(false, "/"+evalName)
 
-	validSubmissions = []string{
+	validSubmissions = []submissionKind{
 		"m1",
 		"m2",
 		"m3",
@@ -43,7 +41,7 @@ var (
 	newInferenceRe  = regexp.MustCompile(`New Inference`)
 )
 
-func parseNewInference(job *model.Ece408JobResponseBody, s string) {
+func parseNewInference(job *Ece408JobResponseBody, s string) {
 	if !newInferenceRe.MatchString(s) {
 		return
 	}
@@ -51,7 +49,7 @@ func parseNewInference(job *model.Ece408JobResponseBody, s string) {
 	return
 }
 
-func parseProgramOutput(job *model.Ece408JobResponseBody, s string) {
+func parseProgramOutput(job *Ece408JobResponseBody, s string) {
 	if !programOutputRe.MatchString(s) {
 		return
 	}
@@ -71,7 +69,7 @@ func parseProgramOutput(job *model.Ece408JobResponseBody, s string) {
 	return
 }
 
-func parseOpTimeOutput(job *model.Ece408JobResponseBody, s string) {
+func parseOpTimeOutput(job *Ece408JobResponseBody, s string) {
 	if !opTimeOutputRe.MatchString(s) {
 		return
 	}
@@ -89,7 +87,7 @@ func parseOpTimeOutput(job *model.Ece408JobResponseBody, s string) {
 	return
 }
 
-func parseTimeOutput(job *model.Ece408JobResponseBody, s string) {
+func parseTimeOutput(job *Ece408JobResponseBody, s string) {
 	if !timeOutputRe.MatchString(s) {
 		return
 	}
@@ -113,7 +111,7 @@ func parseTimeOutput(job *model.Ece408JobResponseBody, s string) {
 	}
 }
 
-func parseProjectURL(job *model.Ece408JobResponseBody, s string) {
+func parseProjectURL(job *Ece408JobResponseBody, s string) {
 	if !projectURLRe.MatchString(s) {
 		return
 	}
@@ -137,16 +135,16 @@ func removeColor(s string) string {
 
 func (c *Client) parseLine(s string) {
 	if c.job == nil {
-		c.job = &Ece408JobResponseBody{}
+		c.jobBody = &Ece408JobResponseBody{}
 	}
-	job, ok := c.job(*Ece408JobResponseBody)
+	body, ok := c.jobBody.(*Ece408JobResponseBody)
 	if !ok {
 		panic("invalid job type")
 	}
 	s = removeColor(s)
-	parseNewInference(job, s)
-	parseOpTimeOutput(job, s)
-	parseProgramOutput(job, s)
-	parseTimeOutput(job, s)
-	parseProjectURL(job, s)
+	parseNewInference(body, s)
+	parseOpTimeOutput(body, s)
+	parseProgramOutput(body, s)
+	parseTimeOutput(body, s)
+	parseProjectURL(body, s)
 }

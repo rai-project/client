@@ -8,7 +8,7 @@ import (
 	upper "upper.io/db.v3"
 )
 
-func GetTeamName(uname string) (string, error) {
+func FindTeamName(uname string) (string, error) {
 
 	prof, err := provider.New()
 	if err != nil {

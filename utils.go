@@ -9,6 +9,13 @@ type ValidationError struct {
 	Message string
 }
 
+type nopWriterCloser struct {
+	io.Writer
+}
+
+// Close ...
+func (nopWriterCloser) Close() error { return nil }
+
 func fprint(w io.Writer, a ...interface{}) (n int, err error) {
 	if w == nil {
 		return 0, nil

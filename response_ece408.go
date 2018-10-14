@@ -11,6 +11,8 @@ import (
 	"github.com/rai-project/config"
 	"github.com/rai-project/database"
 	"github.com/rai-project/database/mongodb"
+	"github.com/rai-project/model"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Ece408Inference is an inference record for ECE 408 Spring 2018
@@ -25,12 +27,13 @@ type Ece408Inference struct {
 
 // Ranking holds info used to track team rankings
 type ECE408Ranking struct {
-	Base          `json:",inline" bson:",inline"`
-	Username      string `json:"username,omitempty"`
-	Teamname      string `json:"teamname,omitempty"`
-	ProjectURL    string `json:"project_url,omitempty"`                          // where the file was uploaded
-	IsSubmission  bool   `bson:"is_submission" json:"is_submission,omitempty"`   // is a final submission
-	SubmissionTag string `bson:"submission_tag" json:"submission_tag,omitempty"` // more info about the submission
+	model.Base    `json:",inline" bson:",inline"`
+	UserID        bson.ObjectId `json:"user_id,omitempty"`
+	Username      string        `json:"username,omitempty"`
+	Teamname      string        `json:"teamname,omitempty"`
+	ProjectURL    string        `json:"project_url,omitempty"`                          // where the file was uploaded
+	IsSubmission  bool          `bson:"is_submission" json:"is_submission,omitempty"`   // is a final submission
+	SubmissionTag string        `bson:"submission_tag" json:"submission_tag,omitempty"` // more info about the submission
 }
 
 type Ece408JobResponseBody struct {

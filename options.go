@@ -6,17 +6,6 @@ import (
 	"time"
 )
 
-type submissionKind string
-
-const (
-	m1     submissionKind = "m1"
-	m2     submissionKind = "m2"
-	m3     submissionKind = "m3"
-	m4     submissionKind = "m4"
-	final  submissionKind = "final"
-	custom submissionKind = "custom"
-)
-
 // Options ...
 type Options struct {
 	ctx                  context.Context

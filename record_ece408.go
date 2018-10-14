@@ -9,7 +9,6 @@ import (
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database/mongodb"
-	"github.com/rai-project/model"
 )
 
 func (c *Client) RecordJob() error {
@@ -18,28 +17,31 @@ func (c *Client) RecordJob() error {
 		return errors.New("ranking uninitialized")
 	}
 
-	c.job.CreatedAt = time.Now()
-	c.job.IsSubmission = c.options.isSubmission
+	body, ok := c.jobBody.(*Ece408JobResponseBody)
+	if !ok {
+		panic("invalid job type")
+	}
+
+	defer func() {
+		c.jobBody = body
+	}()
+
+	body.CreatedAt = time.Now()
+	body.IsSubmission = c.options.isSubmission
 	if c.options.submissionKind != custom {
-		c.job.SubmissionTag = string(c.options.submissionKind)
+		body.SubmissionTag = string(c.options.submissionKind)
 	} else {
-		c.job.SubmissionTag = c.options.customSubmissionTag
+		body.SubmissionTag = c.options.customSubmissionTag
 	}
 
 	prof, err := provider.New()
 	user := prof.Info()
-	c.job.Username = user.Username
+	body.UserID = user.ID
+	body.Username = user.Username
 
-	log.Debug("Submission username: " + c.job.Username)
-
-	c.job.Teamname, err = TeamName(c.job.Username)
-
-	log.Debug("Submission teamname: " + c.job.Teamname)
-
-	if c.job.IsSubmission {
-		if c.job.Teamname == "" {
-			return errors.New("no team name found")
-		}
+	body.Teamname, err = FindTeamName(body.Username)
+	if err != nil && body.IsSubmission {
+		return errors.New("no team name found")
 	}
 
 	db, err := mongodb.NewDatabase(config.App.Name)
@@ -48,18 +50,17 @@ func (c *Client) RecordJob() error {
 	}
 	defer db.Close()
 
-	log.Debug("Connecting to table: rankings")
-
-	col, err := model.NewECE408ResponseBodyCollection(db)
+	col, err := NewEce408JobResponseBodyCollection(db)
 	if err != nil {
 		return err
 	}
 	defer col.Close()
 
-	err = col.Insert(c.job)
+	err = col.Insert(body)
 	if err != nil {
-		log.WithError(err).Error("Failed to insert job record:", c.job)
+		log.WithError(err).Error("Failed to insert job record:", body)
+		return err
 	}
 
-	return err
+	return nil
 }

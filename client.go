@@ -49,15 +49,9 @@ type Client struct {
 	optionsJobQueueName   string
 	buildFileJobQueueName string
 	job                   *model.JobResponse
+	jobBody               interface{}
 	done                  chan bool
 }
-
-type nopWriterCloser struct {
-	io.Writer
-}
-
-// Close ...
-func (nopWriterCloser) Close() error { return nil }
 
 // DefaultUploadExpiration ...
 var (
