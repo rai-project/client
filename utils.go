@@ -13,6 +13,13 @@ type nopWriterCloser struct {
 	io.Writer
 }
 
+func (v *ValidationError) Error() string {
+	if v == nil {
+		return ""
+	}
+	return v.Message
+}
+
 // Close ...
 func (nopWriterCloser) Close() error { return nil }
 

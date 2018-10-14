@@ -12,13 +12,11 @@ type Options struct {
 	directory            string
 	buildFilePath        string
 	buildFileBaseName    string
-	isSubmission         bool
 	profilePath          string
 	ratelimit            time.Duration
 	stdout               io.WriteCloser
 	stderr               io.WriteCloser
 	jobQueueName         string
-	customSubmissionTag  string
 	outputDirectory      string
 	forceOutputDirectory bool
 }
@@ -44,13 +42,6 @@ func BuildFilePath(s string) Option {
 func BuildFileBaseName(d string) Option {
 	return func(o *Options) {
 		o.buildFileBaseName = d
-	}
-}
-
-// IsSubmission ...
-func IsSubmission(d bool) Option {
-	return func(o *Options) {
-		o.isSubmission = d
 	}
 }
 

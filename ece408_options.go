@@ -3,11 +3,15 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type submissionKind string
+type submissionKindKey struct{}
+type isSubmissionKey struct{}
 
 const (
 	m1     submissionKind = "m1"
@@ -17,6 +21,10 @@ const (
 	final  submissionKind = "final"
 	custom submissionKind = "custom"
 )
+
+func SubmissionUploadExpiration() time.Time {
+	return time.Now().AddDate(0, 6, 0) // six months from now
+}
 
 func isValidSubmission(s submissionKind) bool {
 	for _, e := range validSubmissions {
@@ -36,7 +44,8 @@ func SubmissionName(s0 string) Option {
 	return func(o *Options) {
 		s := submissionKind(s0)
 		isValidSubmission(s)
-		o.submissionKind = s
-		o.isSubmission = true
+		o.ctx = context.WithValue(o.ctx, submissionKindKey{}, s)
+		o.ctx = context.WithValue(o.ctx, isSubmissionKey{}, true)
+		o.ctx = context.WithValue(o.ctx, uploadExpirationKey{}, SubmissionUploadExpiration())
 	}
 }

@@ -56,12 +56,11 @@ type Client struct {
 // DefaultUploadExpiration ...
 var (
 	DefaultUploadExpiration = func() time.Time {
-		return time.Now().AddDate(0, 0, 1) // tomorrow
-	}
-	SubmissionUploadExpiration = func() time.Time {
-		return time.Now().AddDate(0, 6, 0) // six months from now
+		return time.Now().AddDate(0, 0, 7) // next week
 	}
 )
+
+type uploadExpirationKey struct{}
 
 // JobQueueName returns the job queue name from option, build file, or config in that order
 func (c *Client) JobQueueName() string {
@@ -85,9 +84,8 @@ func New(opts ...Option) (*Client, error) {
 	}
 
 	options := Options{
-		ctx:               context.Background(),
+		ctx:               context.WithValue(context.Background(), uploadExpirationKey{}, DefaultUploadExpiration()),
 		directory:         "",
-		isSubmission:      false,
 		buildFileBaseName: Config.BuildFileBaseName,
 		buildFilePath:     "",
 		ratelimit:         ratelimit.Config.RateLimit,
@@ -200,9 +198,10 @@ func (c *Client) Upload() error {
 	fprintln(c.options.stdout, color.YellowString("✱ Uploading your project directory. This may take a few minutes."))
 
 	uploadKey := Config.UploadDestinationDirectory + "/" + c.ID.Hex() + "." + archive.Extension()
-	uploadExpiration := DefaultUploadExpiration()
-	if c.options.isSubmission {
-		uploadExpiration = SubmissionUploadExpiration()
+
+	uploadExpiration, ok := c.options.ctx.Value(uploadExpirationKey{}).(time.Time)
+	if !ok {
+		uploadExpiration = DefaultUploadExpiration()
 	}
 
 	key, err := st.UploadFrom(

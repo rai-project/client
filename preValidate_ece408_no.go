@@ -2,14 +2,16 @@
 
 package client
 
-func (c *Client) validateUserRole() {
+func (c *Client) validateUserRole() error {
 	role := "" // todo: get role
 
 	if role == "ece408_student" {
-		panic(ValidationError{
+		return &ValidationError{
 			Message: "You are using an invalid client. Please download the correct client from http://github.com/rai-project/rai",
-		})
+		}
 	}
+
+	return nil
 }
 
 func (c *Client) preValidate() error {

@@ -12,14 +12,16 @@ import (
 	"github.com/rai-project/database/mongodb"
 )
 
-func (c *Client) validateUserRole() {
+func (c *Client) validateUserRole() error {
 	role := "" // todo: get role
 
 	if role != "ece408_student" {
-		panic(ValidationError{
+		return &ValidationError{
 			Message: "You are using an invalid client. Please download the correct client from http://github.com/rai-project/rai",
-		})
+		}
 	}
+
+	return nil
 }
 
 func (c *Client) validateSubmission() error {
@@ -27,7 +29,11 @@ func (c *Client) validateSubmission() error {
 
 	options := c.options
 
-	switch options.submissionKind {
+	submissionKind, ok := options.ctx.Value(submissionKindKey{}).(submissionKind)
+	if !ok {
+		return errors.New("invalid submission")
+	}
+	switch submissionKind {
 	case m1:
 		buf = m1Build
 	case m2:
@@ -42,7 +48,7 @@ func (c *Client) validateSubmission() error {
 		log.Info("Using embedded eval build for custom submission")
 		buf = evalBuild
 	default:
-		return errors.New("unrecognized submission type " + string(options.submissionKind))
+		return errors.Errorf("unrecognized submission type %v", submissionKind)
 	}
 	fprintf(c.options.stdout, color.YellowString("✱ Using the following build file for submission:\n%s"), string(buf))
 
@@ -71,11 +77,13 @@ func (c *Client) validateSubmission() error {
 // Validate ...
 func (c *Client) preValidate() error {
 	options := c.options
-	if options.isSubmission {
-		if err := c.validateSubmission(); err != nil {
-			return err
-		}
+	isSubmission, ok := options.ctx.Value(isSubmissionKey{}).(bool)
+	if !ok {
+		return nil
+	}
+	if !isSubmission {
+		return nil
 	}
 
-	return nil
+	return c.validateSubmission()
 }

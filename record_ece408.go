@@ -9,6 +9,7 @@ import (
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database/mongodb"
+	"github.com/spf13/cast"
 )
 
 func (c *Client) RecordJob() error {
@@ -27,12 +28,8 @@ func (c *Client) RecordJob() error {
 	}()
 
 	body.CreatedAt = time.Now()
-	body.IsSubmission = c.options.isSubmission
-	if c.options.submissionKind != custom {
-		body.SubmissionTag = string(c.options.submissionKind)
-	} else {
-		body.SubmissionTag = c.options.customSubmissionTag
-	}
+	body.IsSubmission = cast.ToBool(c.options.ctx.Value(isSubmissionKey{}))
+	body.SubmissionTag = cast.ToString(c.options.ctx.Value(submissionKindKey{}))
 
 	prof, err := provider.New()
 	user := prof.Info()
