@@ -26,24 +26,23 @@ func SubmissionUploadExpiration() time.Time {
 	return time.Now().AddDate(0, 6, 0) // six months from now
 }
 
-func isValidSubmission(s submissionKind) bool {
+func validateSubmission(s submissionKind) error {
 	for _, e := range validSubmissions {
 		if strings.ToLower(string(s)) == strings.ToLower(string(e)) {
-			return true
+			return nil
 		}
 	}
-	panic(
-		&ValidationError{
-			Message: fmt.Sprintf("invalid submission name. Valid submission names are %v", validSubmissions),
-		},
-	)
-	return false
+	return &ValidationError{
+		Message: fmt.Sprintf("invalid submission name. Valid submission names are %v", validSubmissions),
+	}
 }
 
 func SubmissionName(s0 string) Option {
 	return func(o *Options) {
 		s := submissionKind(s0)
-		isValidSubmission(s)
+		if err := validateSubmission(s); err != nil {
+			panic(err)
+		}
 		o.ctx = context.WithValue(o.ctx, submissionKindKey{}, s)
 		o.ctx = context.WithValue(o.ctx, isSubmissionKey{}, true)
 		o.ctx = context.WithValue(o.ctx, uploadExpirationKey{}, SubmissionUploadExpiration())

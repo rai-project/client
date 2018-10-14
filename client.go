@@ -324,6 +324,10 @@ func (c *Client) Disconnect() error {
 		return nil
 	}
 
+	defer func() {
+		c.isConnected = false
+	}()
+
 	for _, sub := range c.subscribers {
 		sub.Stop()
 	}
