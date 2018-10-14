@@ -18,7 +18,6 @@ type Options struct {
 	stdout               io.WriteCloser
 	stderr               io.WriteCloser
 	jobQueueName         string
-	submissionKind       submissionKind
 	customSubmissionTag  string
 	outputDirectory      string
 	forceOutputDirectory bool
