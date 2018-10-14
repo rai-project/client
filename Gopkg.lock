@@ -407,6 +407,14 @@
 [[projects]]
   branch = "master"
   digest = "0:"
+  name = "github.com/rai-project/acl"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "923986ee52c5bc4602763a0adc9b574136787887"
+
+[[projects]]
+  branch = "master"
+  digest = "0:"
   name = "github.com/rai-project/archive"
   packages = ["."]
   pruneopts = "UT"
@@ -424,7 +432,7 @@
     "secret",
   ]
   pruneopts = "UT"
-  revision = "11483ad8ad670bb21ed29ad817596011697e8c44"
+  revision = "03ebf120b0fa0780f733dce7186dce58e79c2c40"
 
 [[projects]]
   branch = "master"
@@ -494,7 +502,7 @@
   name = "github.com/rai-project/model"
   packages = ["."]
   pruneopts = "UT"
-  revision = "83bd37bf6f01fbb9ad6b7b918833533950dc3f81"
+  revision = "21eb33068eebfa9cb3dc6dc35ce1efb1363e9978"
 
 [[projects]]
   branch = "master"
@@ -559,11 +567,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b5441fd85b3c8e145b8bf0c2f8e09eb8160bab94fe51c3dc506f1329af637fb7"
+  digest = "0:"
   name = "github.com/rai-project/utils"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ce3f0d62f06c39aef110fb693747dda95fcb631a"
+  revision = "6708a9c28d4e0c3c6bd19213f4920a16f43865d4"
 
 [[projects]]
   branch = "master"
@@ -825,6 +833,9 @@
     "github.com/briandowns/spinner",
     "github.com/fatih/color",
     "github.com/k0kubun/pp",
+    "github.com/mailru/easyjson",
+    "github.com/mailru/easyjson/jlexer",
+    "github.com/mailru/easyjson/jwriter",
     "github.com/mattn/go-colorable",
     "github.com/pkg/errors",
     "github.com/rai-project/archive",
@@ -847,6 +858,7 @@
     "github.com/rai-project/store/s3",
     "github.com/rai-project/vipertags",
     "github.com/sirupsen/logrus",
+    "github.com/spf13/cast",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
     "gopkg.in/mgo.v2/bson",
