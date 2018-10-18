@@ -40,7 +40,6 @@ type Client struct {
 	broker                broker.Broker
 	pubsubConn            pubsub.Connection
 	profile               auth.Profile
-	isConnected           bool
 	serializer            serializer.Serializer
 	subscribers           []pubsub.Subscriber
 	buildSpec             model.BuildSpecification
@@ -112,7 +111,6 @@ func New(opts ...Option) (*Client, error) {
 
 	clnt := &Client{
 		ID:                  bson.NewObjectId(),
-		isConnected:         false,
 		options:             options,
 		serializer:          json.New(),
 		configJobQueueName:  Config.JobQueueName,
@@ -248,6 +246,9 @@ func (c *Client) Publish() error {
 		return err
 	}
 
+	// create a broker object.
+	// this currently uses sqs, but should
+	// be abstracted out
 	brkr, err := sqs.New(
 		sqs.QueueName(c.JobQueueName()),
 		broker.Serializer(c.serializer),
@@ -257,7 +258,8 @@ func (c *Client) Publish() error {
 		return err
 	}
 	c.broker = brkr
-	log.Debug("Submitting to queue=", c.JobQueueName())
+
+	log.Debug(color.GreenString("✱Submitting to queue= " + c.JobQueueName()))
 	err = brkr.Publish(
 		c.JobQueueName(),
 		&broker.Message{
@@ -297,41 +299,37 @@ func (c *Client) Subscribe() error {
 
 	c.pubsubConn = redisConn
 
+	// the channel name is of the form rai/log-xxxxxxxx
 	subscribeChannel := config.App.Name + "/log-" + c.ID.Hex()
 	subscriber, err := redis.NewSubscriber(redisConn, subscribeChannel)
 	if err != nil {
 		return errors.Wrap(err, "cannot create redis subscriber")
 	}
 
+	// run resultHandler for each message we get from
+	// the pubsub
 	c.resultHandler(subscriber.Start())
 
 	c.subscribers = append(c.subscribers, subscriber)
 	return nil
 }
 
-// Connect ...
+// Connect to the brokers
 func (c *Client) Connect() error {
 	if err := c.broker.Connect(); err != nil {
 		return err
 	}
-	c.isConnected = true
 	return nil
 }
 
 // Disconnect ...
 func (c *Client) Disconnect() error {
-	if !c.isConnected {
-		return nil
-	}
-
-	defer func() {
-		c.isConnected = false
-	}()
-
+	// stop subscribing to each of the subscribers
+	// we have listened to
 	for _, sub := range c.subscribers {
 		sub.Stop()
 	}
-
+	// close the pubsub connection if it exists
 	if c.pubsubConn != nil {
 		c.pubsubConn.Close()
 	}
@@ -339,8 +337,10 @@ func (c *Client) Disconnect() error {
 	return c.broker.Disconnect()
 }
 
-// Wait ...
+// Wait until we are complete (got the end signal)
 func (c *Client) Wait() error {
+	// the channel is written to (or closed)
+	// when the end signal is received
 	<-c.done
 	return nil
 }

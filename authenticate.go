@@ -2,6 +2,10 @@ package client
 
 import "github.com/rai-project/aws"
 
+// creates an AWS session. this uses STS
+// which allows us to provide a session
+// that's only valid for certain amount
+// of time.
 func (c *Client) createAWSSession() error {
 
 	// Create an AWS session
@@ -18,6 +22,8 @@ func (c *Client) createAWSSession() error {
 	return nil
 }
 
+// create an authentication token for AWS and fix
+// the docker credientials in the job request
 func (c *Client) Authenticate() error {
 	if err := c.createAWSSession(); err != nil {
 		return err
