@@ -3,6 +3,9 @@ package client
 import (
 	"fmt"
 	"io"
+	"strings"
+
+	"github.com/rai-project/acl"
 )
 
 type ValidationError struct {
@@ -18,6 +21,11 @@ func (v *ValidationError) Error() string {
 		return ""
 	}
 	return v.Message
+}
+
+func isECE408Role(r acl.Role) bool {
+	s := strings.ToLower(string(r))
+	return strings.Contains(s, "ece408")
 }
 
 // Close ...

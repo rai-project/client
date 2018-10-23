@@ -13,9 +13,12 @@ import (
 )
 
 func (c *Client) validateUserRole() error {
-	role := "" // todo: get role
+	role, err := c.profile.GetRole()
+	if err != nil {
+		return err
+	}
 
-	if role != "ece408_student" {
+	if !isECE408Role(role) {
 		return &ValidationError{
 			Message: "You are using an invalid client. Please download the correct client from http://github.com/rai-project/rai",
 		}
