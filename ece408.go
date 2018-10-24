@@ -135,7 +135,11 @@ func removeColor(s string) string {
 
 func (c *Client) parseLine(s string) {
 	if c.job == nil {
-		c.jobBody = &Ece408JobResponseBody{}
+		c.jobBody = &Ece408JobResponseBody{
+      ID: c.ID,
+      CreatedAt: time.Now(),
+      UpdatedAt: time.Now(),
+    }
 	}
 	body, ok := c.jobBody.(*Ece408JobResponseBody)
 	if !ok {
