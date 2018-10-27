@@ -6,8 +6,9 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
+
+	"github.com/acarl005/stripansi"
 )
 
 var (
@@ -33,7 +34,6 @@ var (
 		"eval",
 	}
 
-	colorRe         = regexp.MustCompile(`\[(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]`)
 	timeOutputRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
 	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Model: (.*)`)
 	opTimeOutputRe  = regexp.MustCompile(`Op Time: ([-+]?[0-9]*\.?[0-9]+)`)
@@ -128,11 +128,6 @@ func parseProjectURL(job *Ece408JobResponseBody, s string) {
 	return
 }
 
-func removeColor(s string) string {
-	s = strings.Replace(s, "\x1b", "", -1)
-	return colorRe.ReplaceAllString(s, "")
-}
-
 func (c *Client) parseLine(s string) {
 	if c.job == nil {
 		c.jobBody = &Ece408JobResponseBody{}
@@ -141,7 +136,7 @@ func (c *Client) parseLine(s string) {
 	if !ok {
 		panic("invalid job type")
 	}
-	s = removeColor(s)
+	s = stripansi.Strip(s)
 	parseNewInference(body, s)
 	parseOpTimeOutput(body, s)
 	parseProgramOutput(body, s)

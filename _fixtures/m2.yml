@@ -8,7 +8,6 @@ resources:
   gpu:
     architecture: volta
     count: 1
-  network: false
 commands:
   build:
     - /bin/bash -c "cp -rv /ece408_src/* /mxnet/src/operator/custom" # copy golden files to mxnet source tree
