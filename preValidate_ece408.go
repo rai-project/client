@@ -53,7 +53,7 @@ func (c *Client) validateSubmission() error {
 	default:
 		return errors.Errorf("unrecognized submission type %v", submissionKind)
 	}
-	fprintf(c.options.stdout, color.YellowString("✱ Using the following build file for submission:\n%s"), string(buf))
+	fprintf(c.options.stdout, color.CyanString("✱ Using the following build file for submission:\n%s"), string(buf))
 
 	if err := c.readSpec(buf); err != nil {
 		return err

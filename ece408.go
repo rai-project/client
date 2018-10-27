@@ -134,7 +134,6 @@ func (c *Client) parseLine(s string) {
 		c.jobBody = &Ece408JobResponseBody{
 			ID: c.ID,
 			ECE408Ranking: ECE408Ranking{
-				ID: c.ID,
 				Base: model.Base{
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),

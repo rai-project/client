@@ -5,7 +5,7 @@ package client
 import (
 	"time"
 
-	"github.com/k0kubun/pp"
+	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
@@ -26,7 +26,6 @@ func (c *Client) RecordJob() error {
 
 	// body.ID = ""
 	body.UpdatedAt = time.Now()
-	pp.Println(c.options.ctx.Value(submissionKindKey{}))
 	body.IsSubmission = cast.ToBool(c.options.ctx.Value(isSubmissionKey{}))
 	body.SubmissionTag = cast.ToString(c.options.ctx.Value(submissionKindKey{}))
 
@@ -37,7 +36,8 @@ func (c *Client) RecordJob() error {
 
 	body.Teamname, err = FindTeamName(body.Username)
 	if err != nil && body.IsSubmission {
-		return errors.New("no team name found")
+		color.Red("no team name found.\n")
+		body.Teamname = user.Team.Name
 	}
 
 	db, err := mongodb.NewDatabase(config.App.Name)
