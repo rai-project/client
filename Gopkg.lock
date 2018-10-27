@@ -108,7 +108,7 @@
   name = "github.com/containerd/continuity"
   packages = ["pathdriver"]
   pruneopts = "UT"
-  revision = "c220ac4f01b8a301edcb9c9c05d7600249138cfa"
+  revision = "bea7585dbfac2847dbf49a6b8e7738a36c09bc75"
 
 [[projects]]
   digest = "0:"
@@ -433,7 +433,7 @@
     "secret",
   ]
   pruneopts = "UT"
-  revision = "eb801fd23813029ffea891a6ad9252bb4195f165"
+  revision = "f06ec209b357d87f7a7966622200ea7fae172257"
 
 [[projects]]
   branch = "master"
@@ -441,7 +441,7 @@
   name = "github.com/rai-project/aws"
   packages = ["."]
   pruneopts = "UT"
-  revision = "1c8789f64378727de2e0c1a912c874ad74e922c1"
+  revision = "c2385f07f2959d2dce9c4ccfa3e087664387ab51"
 
 [[projects]]
   branch = "master"
@@ -479,7 +479,7 @@
     "mongodb",
   ]
   pruneopts = "UT"
-  revision = "4df12c64307246116f505284e77f9dc66fbe9fad"
+  revision = "7c9e6a86f2b5ddd1c061e059b6b7f5cab0ba43d3"
 
 [[projects]]
   branch = "master"
