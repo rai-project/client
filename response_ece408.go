@@ -28,8 +28,9 @@ type Ece408Inference struct {
 // Ranking holds info used to track team rankings
 type ECE408Ranking struct {
 	model.Base    `json:",inline" bson:",inline"`
-	UserID        bson.ObjectId `json:"user_id,omitempty"`
+	ID            bson.ObjectId `json:"_id" bson:"_id" gorm:"primary_key" toml:"id,omitempty" validate:"required"`
 	Username      string        `json:"username,omitempty"`
+	UserAccessKey string        `json:"user_accesskey,omitempty"` // the student's access key
 	Teamname      string        `json:"teamname,omitempty"`
 	ProjectURL    string        `json:"project_url,omitempty"`                          // where the file was uploaded
 	IsSubmission  bool          `bson:"is_submission" json:"is_submission,omitempty"`   // is a final submission
@@ -37,6 +38,7 @@ type ECE408Ranking struct {
 }
 
 type Ece408JobResponseBody struct {
+	ID            bson.ObjectId `json:"_id" bson:"_id" gorm:"primary_key" toml:"id,omitempty" validate:"required"`
 	ECE408Ranking `json:",inline" bson:",inline"`
 	Inferences    []Ece408Inference
 }

@@ -79,6 +79,9 @@ func (c *Client) validateSubmission() error {
 
 // Validate ...
 func (c *Client) preValidate() error {
+	// if err := c.validateUserRole(); err != nil {
+	// 	return err
+	// }
 	options := c.options
 	isSubmission, ok := options.ctx.Value(isSubmissionKey{}).(bool)
 	if !ok {

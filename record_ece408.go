@@ -5,6 +5,7 @@ package client
 import (
 	"time"
 
+	"github.com/k0kubun/pp"
 	"github.com/pkg/errors"
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
@@ -14,7 +15,7 @@ import (
 
 func (c *Client) RecordJob() error {
 
-	if c.job == nil {
+	if c.jobBody == nil {
 		return errors.New("ranking uninitialized")
 	}
 
@@ -23,18 +24,16 @@ func (c *Client) RecordJob() error {
 		panic("invalid job type")
 	}
 
-	defer func() {
-		c.jobBody = body
-	}()
-
-	body.CreatedAt = time.Now()
+	// body.ID = ""
+	body.UpdatedAt = time.Now()
+	pp.Println(c.options.ctx.Value(submissionKindKey{}))
 	body.IsSubmission = cast.ToBool(c.options.ctx.Value(isSubmissionKey{}))
 	body.SubmissionTag = cast.ToString(c.options.ctx.Value(submissionKindKey{}))
 
 	prof, err := provider.New()
 	user := prof.Info()
-	body.UserID = user.ID
 	body.Username = user.Username
+	body.UserAccessKey = user.AccessKey
 
 	body.Teamname, err = FindTeamName(body.Username)
 	if err != nil && body.IsSubmission {

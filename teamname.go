@@ -51,7 +51,6 @@ func FindTeamName(uname string) (string, error) {
 	}
 
 	if len(teams) == 0 {
-
 		return "", errors.New("No Team entry for " + uname + ".")
 	}
 

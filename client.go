@@ -231,9 +231,10 @@ func (c *Client) Publish() error {
 	profile := c.profile.Info()
 
 	jobRequest := model.JobRequest{
+		ID: c.ID,
 		Base: model.Base{
-			ID:        c.ID,
 			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		},
 		ClientVersion:      config.App.Version,
 		UploadKey:          c.uploadKey,
@@ -333,8 +334,10 @@ func (c *Client) Disconnect() error {
 	if c.pubsubConn != nil {
 		c.pubsubConn.Close()
 	}
-
-	return c.broker.Disconnect()
+	if c.broker != nil {
+		return c.broker.Disconnect()
+	}
+	return nil
 }
 
 // Wait until we are complete (got the end signal)

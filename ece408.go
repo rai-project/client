@@ -132,9 +132,10 @@ func parseProjectURL(job *Ece408JobResponseBody, s string) {
 func (c *Client) parseLine(s string) {
 	if c.job == nil {
 		c.jobBody = &Ece408JobResponseBody{
+			ID: c.ID,
 			ECE408Ranking: ECE408Ranking{
+				ID: c.ID,
 				Base: model.Base{
-					ID:        c.ID,
 					CreatedAt: time.Now(),
 					UpdatedAt: time.Now(),
 				},
