@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/acarl005/stripansi"
+	"github.com/rai-project/model"
 )
 
 var (
@@ -131,10 +132,14 @@ func parseProjectURL(job *Ece408JobResponseBody, s string) {
 func (c *Client) parseLine(s string) {
 	if c.job == nil {
 		c.jobBody = &Ece408JobResponseBody{
-      ID: c.ID,
-      CreatedAt: time.Now(),
-      UpdatedAt: time.Now(),
-    }
+			ECE408Ranking: ECE408Ranking{
+				Base: model.Base{
+					ID:        c.ID,
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				},
+			},
+		}
 	}
 	body, ok := c.jobBody.(*Ece408JobResponseBody)
 	if !ok {
