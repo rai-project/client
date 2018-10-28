@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/acarl005/stripansi"
@@ -35,11 +36,11 @@ var (
 		"eval",
 	}
 
-	timeOutputRe    = regexp.MustCompile(`([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*\.?[0-9]+)elapsed.*`)
+	timeOutputRe    = regexp.MustCompile(`^([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*:[0-9]*\.?[0-9]*)elapsed.+`)
 	programOutputRe = regexp.MustCompile(`Correctness: ([-+]?[0-9]*\.?[0-9]+)\s+Model: (.*)`)
 	opTimeOutputRe  = regexp.MustCompile(`Op Time: ([-+]?[0-9]*\.?[0-9]+)`)
 	projectURLRe    = regexp.MustCompile(`✱ The build folder has been uploaded to (\s*\[+?\s*(\!?)\s*([a-z]*)\s*\|?\s*([a-z0-9\.\-_]*)\s*\]+?)?\s*([^\s]+)\s*\..*`)
-	newInferenceRe  = regexp.MustCompile(`New Inference`)
+	newInferenceRe  = regexp.MustCompile(`Loading model... done\r\nNew Inference`)
 )
 
 func parseNewInference(job *Ece408JobResponseBody, s string) {
@@ -75,7 +76,7 @@ func parseOpTimeOutput(job *Ece408JobResponseBody, s string) {
 		return
 	}
 	matches := opTimeOutputRe.FindAllStringSubmatch(s, 1)[0]
-	if len(matches) < 2 {
+	if len(matches) < 1 {
 		log.WithField("match_count", len(matches)).
 			Debug("Unexpected number of matches while parsing op time")
 		return
@@ -106,7 +107,8 @@ func parseTimeOutput(job *Ece408JobResponseBody, s string) {
 	if err == nil {
 		job.CurrentInference().SystemFullRuntime = system
 	}
-	elapsed, err := time.ParseDuration(matches[3] + "s")
+	i := strings.Index(matches[3], ":")
+	elapsed, err := time.ParseDuration(matches[3][i+1:len(matches[3])-i+1] + "s")
 	if err == nil {
 		job.CurrentInference().ElapsedFullRuntime = elapsed
 	}
@@ -130,7 +132,7 @@ func parseProjectURL(job *Ece408JobResponseBody, s string) {
 }
 
 func (c *Client) parseLine(s string) {
-	if c.job == nil {
+	if c.jobBody == nil {
 		c.jobBody = &Ece408JobResponseBody{
 			ID: c.ID,
 			ECE408Ranking: ECE408Ranking{
@@ -141,14 +143,16 @@ func (c *Client) parseLine(s string) {
 			},
 		}
 	}
+
 	body, ok := c.jobBody.(*Ece408JobResponseBody)
 	if !ok {
 		panic("invalid job type")
 	}
+
 	s = stripansi.Strip(s)
-	parseNewInference(body, s)
-	parseOpTimeOutput(body, s)
-	parseProgramOutput(body, s)
-	parseTimeOutput(body, s)
-	parseProjectURL(body, s)
+	parseNewInference(body, s)  //c.jobBody.(*Ece408JobResponseBody), s)
+	parseOpTimeOutput(body, s)  //c.jobBody.(*Ece408JobResponseBody), s)
+	parseProgramOutput(body, s) //c.jobBody.(*Ece408JobResponseBody), s)
+	parseTimeOutput(body, s)    //c.jobBody.(*Ece408JobResponseBody), s)
+	parseProjectURL(body, s)    //c.jobBody.(*Ece408JobResponseBody), s)
 }

@@ -27,7 +27,30 @@ func (c *Client) RecordJob() error {
 	// body.ID = ""
 	body.UpdatedAt = time.Now()
 	body.IsSubmission = cast.ToBool(c.options.ctx.Value(isSubmissionKey{}))
-	body.SubmissionTag = cast.ToString(c.options.ctx.Value(submissionKindKey{}))
+
+	//var s submissionKind
+	//s = c.options.ctx.Value(submissionKindKey{}).(submissionKind)
+
+	submissionKind, ok := c.options.ctx.Value(submissionKindKey{}).(submissionKind)
+	if ok {
+		switch submissionKind {
+		case m1:
+			body.SubmissionTag = "m1"
+		case m2:
+			body.SubmissionTag = "m2"
+		case m3:
+			body.SubmissionTag = "m3"
+		case m4:
+			body.SubmissionTag = "m4"
+		case final:
+			body.SubmissionTag = "final"
+		case custom:
+			log.Info("Using embedded eval build for custom submission")
+			body.SubmissionTag = "eval"
+		default:
+			return errors.Errorf("unrecognized submission type %v", submissionKind)
+		}
+	}
 
 	prof, err := provider.New()
 	user := prof.Info()
