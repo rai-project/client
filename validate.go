@@ -1,9 +1,8 @@
 package client
 
 import (
-	"io/ioutil"
-
 	"github.com/pkg/errors"
+	"io/ioutil"
 )
 
 // validation of client parameters this includes:
@@ -28,20 +27,22 @@ func (c *Client) Validate() error {
 
 	// Find the build sepc file. returns an error
 	// if the file cannot be found
-	specFilePath, err := c.findSpecFile()
-	if err != nil {
-		return err
-	}
+	if c.buildSpec.Commands.Build == nil {
+		specFilePath, err := c.findSpecFile()
+		if err != nil {
+			return err
+		}
 
-	// Read the build spec file into a buffer
-	buf, err := ioutil.ReadFile(specFilePath)
-	if err != nil {
-		return errors.Wrapf(err, "unable to read %v", specFilePath)
-	}
+		// Read the build spec file into a buffer
+		buf, err := ioutil.ReadFile(specFilePath)
+		if err != nil {
+			return errors.Wrapf(err, "unable to read %v", specFilePath)
+		}
 
-	// Read the build spec file into our internal data structure
-	if err := c.readSpec(buf); err != nil {
-		return err
+		// Read the build spec file into our internal data structure
+		if err := c.readSpec(buf); err != nil {
+			return err
+		}
 	}
 	return nil
 }
