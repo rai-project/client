@@ -34,6 +34,7 @@ type ECE408Ranking struct {
 	ProjectURL    string `json:"project_url,omitempty"`                          // where the file was uploaded
 	IsSubmission  bool   `bson:"is_submission" json:"is_submission,omitempty"`   // is a final submission
 	SubmissionTag string `bson:"submission_tag" json:"submission_tag,omitempty"` // more info about the submission
+	RankingValid  bool   `bson:"ranking_valid" json:"ranking_valid,omitempty"`
 }
 
 type Ece408JobResponseBody struct {

@@ -3,14 +3,14 @@
 package client
 
 import (
-	"time"
-
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database/mongodb"
 	"github.com/spf13/cast"
+	s "strings"
+	"time"
 )
 
 func (c *Client) RecordJob() error {
@@ -62,6 +62,28 @@ func (c *Client) RecordJob() error {
 		color.Red("no team name found.\n")
 		body.Teamname = user.Team.Name
 	}
+
+	//Determine if run can be used for ranking
+	var ranking_valid bool
+	var st string
+
+	ranking_valid = true
+
+	for _, num := range c.buildSpec.Commands.Build {
+		if s.Contains(string(num), ".py") {
+			st = s.TrimLeft(string(num), "/usr/bin/time ")
+
+			if st != "python m1.1.py" && st != "python m1.1.py 10000" &&
+				st != "python m2.1.py" && st != "python m2.1.py 10000" &&
+				st != "python m3.1.py" && st != "python m3.1.py 10000" &&
+				st != "python m4.1.py" && st != "python m4.1.py 10000" &&
+				!body.IsSubmission {
+				ranking_valid = false
+			}
+		}
+	}
+
+	body.RankingValid = ranking_valid
 
 	db, err := mongodb.NewDatabase(config.App.Name)
 	if err != nil {

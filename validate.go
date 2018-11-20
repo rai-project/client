@@ -27,6 +27,7 @@ func (c *Client) Validate() error {
 
 	// Find the build sepc file. returns an error
 	// if the file cannot be found
+	//But first check to see if c.preValidate() already added details to c.buildSpecCommands.Build
 	if c.buildSpec.Commands.Build == nil {
 		specFilePath, err := c.findSpecFile()
 		if err != nil {
