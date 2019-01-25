@@ -14,12 +14,13 @@ type submissionKindKey struct{}
 type isSubmissionKey struct{}
 
 const (
-	m1     submissionKind = "m1"
-	m2     submissionKind = "m2"
-	m3     submissionKind = "m3"
-	m4     submissionKind = "m4"
-	final  submissionKind = "final"
-	custom submissionKind = "custom"
+	m1        submissionKind = "m1"
+	m2        submissionKind = "m2"
+	m3        submissionKind = "m3"
+	m4        submissionKind = "m4"
+	final     submissionKind = "final"
+	custom    submissionKind = "custom"
+	algorithm submissionKind = "algorithm"
 )
 
 func SubmissionUploadExpiration() time.Time {

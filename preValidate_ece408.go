@@ -50,6 +50,8 @@ func (c *Client) validateSubmission() error {
 	case custom:
 		log.Info("Using embedded eval build for custom submission")
 		buf = evalBuild
+	case algorithm:
+
 	default:
 		return errors.Errorf("unrecognized submission type %v", submissionKind)
 	}
@@ -59,10 +61,12 @@ func (c *Client) validateSubmission() error {
 		return err
 	}
 
-	for _, requiredFileName := range Config.SubmitRequirements {
-		requiredFilePath := filepath.Join(options.directory, requiredFileName)
-		if !com.IsFile(requiredFilePath) {
-			return errors.Errorf("Didn't find a file required for submission: [%v]", requiredFilePath)
+	if submissionKind != algorithm {
+		for _, requiredFileName := range Config.SubmitRequirements {
+			requiredFilePath := filepath.Join(options.directory, requiredFileName)
+			if !com.IsFile(requiredFilePath) {
+				return errors.Errorf("Didn't find a file required for submission: [%v]", requiredFilePath)
+			}
 		}
 	}
 

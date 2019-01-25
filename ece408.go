@@ -34,6 +34,7 @@ var (
 		"m4",
 		"final",
 		"eval",
+		"algorithm",
 	}
 
 	timeOutputRe    = regexp.MustCompile(`^([0-9]*\.?[0-9]+)user\s+([0-9]*\.?[0-9]+)system\s+([0-9]*:[0-9]*\.?[0-9]*)elapsed.+`)

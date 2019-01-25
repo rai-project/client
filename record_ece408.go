@@ -44,6 +44,8 @@ func (c *Client) RecordJob() error {
 			body.SubmissionTag = "m4"
 		case final:
 			body.SubmissionTag = "final"
+		case algorithm:
+			body.SubmissionTag = "algorithm"
 		case custom:
 			log.Info("Using embedded eval build for custom submission")
 			body.SubmissionTag = "eval"
