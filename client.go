@@ -17,6 +17,7 @@ import (
 	"github.com/rai-project/auth"
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/broker"
+	"github.com/rai-project/broker/rabbitmq"
 	"github.com/rai-project/broker/sqs"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database"
@@ -250,16 +251,25 @@ func (c *Client) Publish() error {
 	// create a broker object.
 	// this currently uses sqs, but should
 	// be abstracted out
-	brkr, err := sqs.New(
-		sqs.QueueName(c.JobQueueName()),
-		broker.Serializer(c.serializer),
-		sqs.Session(c.awsSession),
-	)
+	var brkr broker.Broker
+	if c.options.serverArch == "s390x" {
+		brkr = rabbitmq.New(
+			rabbitmq.QueueName(c.JobQueueName()),
+			broker.Serializer(json.New()),
+		)
+	} else {
+		brkr, err = sqs.New(
+			sqs.QueueName(c.JobQueueName()),
+			broker.Serializer(c.serializer),
+			sqs.Session(c.awsSession),
+		)
+	}
 	if err != nil {
 		return err
 	}
 	c.broker = brkr
 
+	brkr.Connect()
 	log.Debug(color.GreenString("✱Submitting to queue= " + c.JobQueueName()))
 	err = brkr.Publish(
 		c.JobQueueName(),
