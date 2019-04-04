@@ -206,14 +206,17 @@ func (c *Client) Upload() error {
 		zippedReader,
 		uploadKey,
 		s3.Expiration(uploadExpiration),
-		s3.Metadata(map[string]interface{}{
-			"id":         c.ID,
-			"type":       "user_upload",
-			"profile":    c.profile.Info(),
-			"created_at": time.Now(),
+		store.UploadProgressOutput(c.options.stdout),
+		store.UploadMetadata(map[string]interface{}{
+			"id":                  c.ID,
+			"type":                "user_upload",
+			"profile":             c.profile.Info(),
+			"client_version":      config.App.Version,
+			"upload_key":          c.uploadKey,
+			"build_specification": c.buildSpec,
+			"created_at":          time.Now(),
 		}),
 		s3.ContentType(archive.MimeType()),
-		store.UploadProgressOutput(c.options.stdout),
 		store.UploadProgressFinishMessage(color.GreenString("✱ Folder uploaded. Server is now processing your submission.")),
 	)
 	if err != nil {
