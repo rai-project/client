@@ -56,7 +56,7 @@ type Client struct {
 // DefaultUploadExpiration ...
 var (
 	DefaultUploadExpiration = func() time.Time {
-		return time.Now().AddDate(0, 0, 7) // next week
+		return time.Now().AddDate(0, 6, 0) // next 6 months
 	}
 )
 
