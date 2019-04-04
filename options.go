@@ -19,6 +19,7 @@ type Options struct {
 	jobQueueName         string
 	outputDirectory      string
 	forceOutputDirectory bool
+	serverArch           string
 }
 
 // Option ...
@@ -90,5 +91,12 @@ func Stderr(s io.WriteCloser) Option {
 func JobQueueName(s string) Option {
 	return func(o *Options) {
 		o.jobQueueName = s
+	}
+}
+
+// ServerArch ...
+func ServerArch(s string) Option {
+	return func(o *Options) {
+		o.serverArch = s
 	}
 }
