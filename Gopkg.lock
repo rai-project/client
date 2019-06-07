@@ -239,6 +239,27 @@
   version = "v0.16.0"
 
 [[projects]]
+  digest = "0:"
+  name = "github.com/gogo/protobuf"
+  packages = [
+    "jsonpb",
+    "proto",
+    "sortkeys",
+    "types",
+  ]
+  pruneopts = "UT"
+  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
+  version = "v1.2.1"
+
+[[projects]]
+  digest = "0:"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2a8bb927dd31d8daada140a5d09578521ce5c36a"
+  version = "v0.0.1"
+
+[[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
   name = "github.com/hashicorp/hcl"
   packages = [
@@ -479,6 +500,7 @@
   name = "github.com/rai-project/broker"
   packages = [
     ".",
+    "rabbitmq",
     "sqs",
   ]
   pruneopts = "UT"
@@ -581,9 +603,10 @@
     ".",
     "bson",
     "json",
+    "jsonpb",
   ]
   pruneopts = "UT"
-  revision = "c73b52fef2017617905a08210dcc65f0880cf11e"
+  revision = "6a71bde4dab7509678eadec05f990bc037de3238"
 
 [[projects]]
   branch = "master"
@@ -673,6 +696,14 @@
   ]
   pruneopts = "UT"
   revision = "fccfc2c271a59647debe6c5802362469a3700f0a"
+
+[[projects]]
+  branch = "master"
+  digest = "0:"
+  name = "github.com/streadway/amqp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "75d898a42a940fbc854dfd1a4199eabdc00cf024"
 
 [[projects]]
   digest = "0:"
@@ -858,6 +889,7 @@
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/briandowns/spinner",
     "github.com/fatih/color",
+    "github.com/golang/snappy",
     "github.com/k0kubun/pp",
     "github.com/mailru/easyjson",
     "github.com/mailru/easyjson/jlexer",
@@ -870,6 +902,7 @@
     "github.com/rai-project/auth/provider",
     "github.com/rai-project/aws",
     "github.com/rai-project/broker",
+    "github.com/rai-project/broker/rabbitmq",
     "github.com/rai-project/broker/sqs",
     "github.com/rai-project/config",
     "github.com/rai-project/database",
