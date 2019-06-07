@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/base64"
 	"io"
 	"os"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/golang/snappy"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/pkg/errors"
 	"github.com/rai-project/archive"
@@ -203,6 +205,11 @@ func (c *Client) Upload() error {
 		uploadExpiration = DefaultUploadExpiration()
 	}
 
+	compressedProfile, err := compressProfileInfo(c.profile.Info())
+	if err != nil {
+		fprintln(c.options.stdout, color.YellowString("✱ Failed to set profile information "+err.Error()+"."))
+	}
+
 	key, err := st.UploadFrom(
 		zippedReader,
 		uploadKey,
@@ -211,7 +218,7 @@ func (c *Client) Upload() error {
 		store.UploadMetadata(map[string]interface{}{
 			"id":                  c.ID,
 			"type":                "user_upload",
-			"profile":             c.profile.Info(),
+			"profile":             compressedProfile,
 			"client_version":      config.App.Version,
 			"upload_key":          c.uploadKey,
 			"build_specification": c.buildSpec,
@@ -227,6 +234,32 @@ func (c *Client) Upload() error {
 	c.uploadKey = key
 
 	return nil
+}
+
+func compress(data interface{}) ([]byte, error) {
+	bts, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+
+	out := snappy.Encode(nil, bts)
+
+	enc := base64.URLEncoding
+	buf := make([]byte, enc.EncodedLen(len(out)))
+	enc.Encode(buf, out)
+	return buf, nil
+}
+
+func compressProfileInfo(prof auth.ProfileBase) (string, error) {
+	infoBts, err := json.Marshal(prof)
+	if err != nil {
+		return "", errors.New("unable to marshal profile")
+	}
+	compressedBts, err := compress(infoBts)
+	if err != nil {
+		return "", errors.New("unable to compress profile")
+	}
+	return string(compressedBts), nil
 }
 
 // Publish ...

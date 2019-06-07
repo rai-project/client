@@ -3,14 +3,15 @@
 package client
 
 import (
+	s "strings"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/pkg/errors"
 	"github.com/rai-project/auth/provider"
 	"github.com/rai-project/config"
 	"github.com/rai-project/database/mongodb"
 	"github.com/spf13/cast"
-	s "strings"
-	"time"
 )
 
 func (c *Client) RecordJob() error {

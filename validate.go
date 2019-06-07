@@ -1,8 +1,9 @@
 package client
 
 import (
-	"github.com/pkg/errors"
 	"io/ioutil"
+
+	"github.com/pkg/errors"
 )
 
 // validation of client parameters this includes:
